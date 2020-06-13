@@ -1,4 +1,4 @@
-clear;clc;
+
 %% Physical & Geometrical parameters
 sht_dms=[0.1 0.0127 100e-6];
 % Steel parameters (Source: https://www.azom.com/article.aspx?ArticleID=6742)
@@ -17,7 +17,7 @@ g=9.81; %Gravity Constant
 % A -> The cross section Area
 % F_shear -> The material Force in the perpendicular 
 % (Source:https://en.wikipedia.org/wiki/Shear_modulus)
-dt0=1e-3;
+dt0=e-3;
 A=prod(sht_dms(2:end));
 %% Discretization/mass-spring parameters
 N=11; % Number of points including edges
@@ -108,16 +108,13 @@ dp_per_norm=normc(R*dp); %Idem. Normalized
 %          defined)
 %     Fixed Rotation:  
 %           The edges (P0 & P6) excert Shear force over P1 and P5
-%          (because the virtual extra edges x_r0 and x_rend are  defined & fix,
-%           since there's a predefined direction of the beam at the edges)
-
+%          (that's because the virtual extra edges x_r0 and x_rend are not
+%          defined)
 x_r0=[1;0];
 x_rend=[1;0];
 
-x_r=normc(dp);
-x_r=[x_r0 x_r x_rend];
-y_r=R*x_r;
-
+x_rel=normc(dp);
+y_rel=R*x_rel;
 %% Eqns of Motion
 f=0;
 a=f/dm;
@@ -128,7 +125,7 @@ avg_p=p(:,1:end-1)+dp/2;
 quiver(avg_p(1,:),avg_p(2,:),dp_per(1,:),dp_per(2,:))
 
 %% Functions
-% function d=disp(p)
-%     
-%     d=p;
-% end
+function d=disp(p)
+    
+    d=p;
+end
