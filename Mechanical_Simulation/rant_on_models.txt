@@ -1,0 +1,13 @@
+It seems there are several models. (https://shellbuckling.com/presentations/otherTopics/pages/page_16.html)
+Which Formally took it from
+
+Shunqi Zhang, “Nonlinear FE Simulation and Active Vibration Control of Piezoelectric Laminated Thin-Walled Smart Structures”, Ph.D. dissertation, Dept. of Machine Knowledge, Technical University of Aachen, 2014
+
+http://publications.rwth-aachen.de/record/444961/
+CT   = Classical Theory (Bernoully-Bernoulli Theory/Kirchoff Love)
+FOSD = First Order Shear Deformation (Timoshenko)
+SOSD = Second Order Shear Deformation
+TOSD = Third Order Shear Deformation
+
++
+ZZ = Zig-Zag 

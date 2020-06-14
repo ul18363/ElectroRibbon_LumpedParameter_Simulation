@@ -98,8 +98,15 @@ dp_per_norm=normc(R*dp); %Idem. Normalized
 %   with respect of the line formed by "i-1" and "i". This displacement is
 %   called dy_rel. And can be calculated by obtaining the component of dp[i]
 %   on the y_rel[i]
-%   5- F_shear= G*A*dy/l
-%   
+
+%   5.0- F_shear= G*A*dy/l (Interenstingly the moment of inertia is
+%   non-relevant Thus this model is probably wrong!) -> It only works in
+%   isotropic materials (but I suspect that at a differential level, which
+%   is not the case in my example)
+%   (Source:https://en.wikipedia.org/wiki/Shear_modulus)
+%
+%   5.1 
+
 % Boundary Conditions:
 %     Free Rotation:
 %          The edges (P0 & P6) don't have Shear Force.
@@ -117,6 +124,7 @@ x_rend=[1;0];
 x_r=normc(dp);
 x_r=[x_r0 x_r x_rend];
 y_r=R*x_r;
+
 
 %% Eqns of Motion
 f=0;
