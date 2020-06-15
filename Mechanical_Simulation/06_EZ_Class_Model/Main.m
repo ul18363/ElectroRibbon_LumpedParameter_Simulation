@@ -6,15 +6,19 @@ try
     gap=50e-6;
     obj= EZModel([0.1 0.0127 100e-6],11,'steel',0.01,gap);
     obj.M=20e-3;%20 grams of load
-    obj.set_damping_factor(3e4);%3e4 pretty close to critical
+    obj.set_damping_factor(1e3);%3e4 pretty close to critical
     dt=1e-7; %Simulation timestep [s]
     %obj.dt_st=dt_st;
     T=5; %Maximum simulation time [s]
     %% Simulation Loop
     profile on
     tic
+    myVideo = VideoWriter('myVideoFile'); %open video file
+    myVideo.FrameRate = 10;  %can adjust this, 5 - 10 works well for me
+    open(myVideo)
     for i=0:dt:T   
         if rem(i,1e-4)==0 % Plot every 0.1ms
+            %% Do the plot
             toc
             %hold off
 %             subplot(2,1,2)
@@ -33,7 +37,12 @@ try
             ylabel('y [mm]')
             axis([0 50 -8e-3 0])
             grid on
-            drawnow
+            %drawnow
+            
+            %% Write Video File
+            frame = getframe(gcf); %get frame
+            writeVideo(myVideo, frame);
+
             %pause(0.5)
             %break
             tic
