@@ -11,6 +11,7 @@ classdef EZModel < handle
         f_el_top
         f_el_btm
         g
+        f_free_tip
     end
     
     methods
@@ -30,15 +31,15 @@ classdef EZModel < handle
             %Define Bottom plate
             obj.bottom_plate=SheetModel(sht_dms,N,0,0,material);
             obj.bottom_plate.define_force_bc('r_fix_x');%Right edge slides on "y"
-            obj.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
+            obj.bottom_plate.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
             
             obj.top_plate=SheetModel(sht_dms,N,0,gap,material);
-            obj.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
-            obj.bottom_plate.define_force_bc('r_fix');%Right edge is fixed
+            obj.top_plate.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
+            obj.top_plate.define_force_bc('r_fix');%Right edge is fixed
             %% The top plate 
         end
         
-        function calculate_forces(obj)
+        function calculate_all_forces(obj)
             obj.bottom_plate.calculate_all_forces(); % Calculate Forces on the bottom plate
             obj.top_plate.calculate_all_forces();    % Calculate Forces on the top plate
             obj.calculate_external_forces();
@@ -46,16 +47,20 @@ classdef EZModel < handle
         end
         function calculate_external_forces(obj)
             % Force of the load
-            f_free_tip=obj.bottom_plate.f(:,end);
+            obj.f_free_tip=obj.bottom_plate.f(:,end);
             dm=obj.bottom_plate.dm;
-            f_loaded_tip=(f_free_tip+obj.M*obj.g)*dm/(obj.M+dm);
+            f_loaded_tip=(obj.f_free_tip+obj.M*obj.g)*dm/(obj.M+dm);
             obj.bottom_plate.f(:,end)=f_loaded_tip;
             % ES forces
             obj.estimate_electrical_force();
             obj.top_plate.f=obj.top_plate.f+obj.f_el_top;
             obj.bottom_plate.f=obj.bottom_plate.f+obj.f_el_btm;
         end
-        
+        function set_damping_factor(obj,damping_factor)
+            obj.top_plate.damp_factor=damping_factor; %Damping Factor
+            obj.bottom_plate.damp_factor=damping_factor; %Damping Factor
+            
+        end
         function estimate_electrical_force(obj)
             obj.f_el_top=zeros(size(obj.top_plate.f)); % For now as zeros
             obj.f_el_btm=zeros(size(obj.bottom_plate.f)); % For now as zeros

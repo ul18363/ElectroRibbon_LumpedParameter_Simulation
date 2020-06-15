@@ -6,7 +6,7 @@ try
     gap=50e-6;
     obj= EZModel([0.1 0.0127 100e-6],11,'steel',0.01,gap);
     obj.M=20e-3;%20 grams of load
-    obj.set_damping_factor(3e4);%3e4 pretty close to critical
+    obj.set_damping_factor(2e4);
     dt=1e-7; %Simulation timestep [s]
     %obj.dt_st=dt_st;
     T=5; %Maximum simulation time [s]
