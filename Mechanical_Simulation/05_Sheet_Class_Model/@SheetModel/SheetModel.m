@@ -66,6 +66,7 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         y
         x_r0_c
         x_rend_c
+        f_mask
     end
     
     methods
@@ -104,7 +105,7 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
             obj.generate_discrete_model(); % Establish masses, spring constants, damping factor
             obj.f_gravity=[zeros(size(obj.x));ones(size(obj.y))*obj.g]*obj.dm; %Define the gravity force
             obj.snap_initial_configuration(); % Save initial configuration
-            
+            obj.define_force_bc('all_free')
         end
         % Inputs: sht_dms,N,x0,y0,material
         function generate_model(obj)
@@ -159,6 +160,7 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         function scaled_vect= scale_up(~,vect,scale)
             scaled_vect=vect.*[scale;scale];
         end
+        %obj= perform_timestep()
         
 %         scale_up=@  vect.*[scale;scale];
 %         dp_f=@(p)diff(p,1,2);
