@@ -1,10 +1,10 @@
 
 clear; clc;
 %profile on
-try
+%try
     %obj=EZModel(sht_dms,N,material,base_width,gap)
     gap=50e-6;
-    obj= EZModel([0.1 0.0127 100e-6],11,'steel',0.01,gap);
+    obj= EZModel([0.1 0.0127 100e-6],21,'steel',0.01,gap);
     obj.M=20e-3;%20 grams of load
     obj.set_damping_factor(1e3);%3e4 pretty close to critical
     dt=1e-7; %Simulation timestep [s]
@@ -13,11 +13,11 @@ try
     %% Simulation Loop
     profile on
     tic
-    myVideo = VideoWriter('myVideoFile'); %open video file
-    myVideo.FrameRate = 10;  %can adjust this, 5 - 10 works well for me
-    open(myVideo)
+    %myVideo = VideoWriter('myVideoFile'); %open video file
+    %myVideo.FrameRate = 10;  %can adjust this, 5 - 10 works well for me
+%    open(myVideo)
     for i=0:dt:T   
-        if rem(i,1e-4)==0 % Plot every 0.1ms
+        if  rem(i,1e-4)==0 % Plot every 0.1ms
             %% Do the plot
             toc
             %hold off
@@ -27,21 +27,21 @@ try
 %             grid on
 %             subplot(2,1,1)
 %             plot(10^3*obj.top_plate.p(1,:),10^3*obj.top_plate.p(2,:),'b-o')
-            hold off
-            plot(10^3*obj.top_plate.p(1,:),10^3*(obj.top_plate.p(2,:)-gap),'b-o')
-            hold on
-            plot(10^3*obj.bottom_plate.p(1,:),10^3*obj.bottom_plate.p(2,:),'r-o')
-            %hold on
-            title(['model t:',num2str(i)])
-            xlabel('x [mm]')
-            ylabel('y [mm]')
-            axis([0 50 -8e-3 0])
-            grid on
-            %drawnow
-            
-            %% Write Video File
-            frame = getframe(gcf); %get frame
-            writeVideo(myVideo, frame);
+%             hold off
+%             plot(10^3*obj.top_plate.p(1,:),10^3*(obj.top_plate.p(2,:)-gap),'b-o')
+%             hold on
+%             plot(10^3*obj.bottom_plate.p(1,:),10^3*obj.bottom_plate.p(2,:),'r-o')
+%             %hold on
+%             title(['model t:',num2str(i)])
+%             xlabel('x [mm]')
+%             ylabel('y [mm]')
+%             axis([0 50 -8e-3 0])
+%             grid on
+%             %drawnow
+%             
+%             %% Write Video File
+%             frame = getframe(gcf); %get frame
+%             writeVideo(myVideo, frame);
 
             %pause(0.5)
             %break
@@ -50,8 +50,10 @@ try
         obj.calculate_all_forces();
         obj.perform_timestep(dt);
     end
-catch
-    
+%catch
+  %%  
 profile viewer
 profile off
-end
+%close(myVideo)
+%%
+%end
