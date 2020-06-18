@@ -12,3 +12,9 @@ Mechanical_Simulation/Mass_Spring/links.xcf
 *.kra~
 
 *.m~
+
+*.mph
+
+*.lock
+
+*.mat
