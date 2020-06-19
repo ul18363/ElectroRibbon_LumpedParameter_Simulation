@@ -1,50 +1,43 @@
 %% Estimate difference in positions
 function calculate_elastic_forces(obj)
-obj.dp=obj.dp_f(obj.p);  % Relative difference in position in global coordinates
+force_type=1; % Type 0: Direct forces in the direction of local_x (1 per way)
+% Type 1: Direct forces in the direction of dp (way is shared)
 
-obj.x_rel=normc(obj.dp); % Obtain the direction of "x_relative", going from "i->ii"
-obj.apply_edges_orientation_bc();
+% Calculate Local Frames of reference
+obj.calculate_local_frames(); % Generate local frames and compute deformations
+% Calculate Deformation in such axis
+obj.calculate_local_deformations();
+% Estimate Elastic Coefficients
 
+% Calculate elastic Forces
 
-obj.x_rel=[obj.x_r0 obj.x_rel obj.x_rend]; % Basically dp, normalized, and shifted one to the right
-
-obj.y_rel=obj.R*obj.x_rel;
-
-%The shear force depends on the distance between the mass elements
-obj.k_trans_vec=obj.GA./vecnorm(obj.dp);
-
-%Establish the orientation of the local frame of reference (i->ii)
-obj.local_frame_x=obj.x_rel(:,1:end-2);
-obj.local_frame_y=obj.y_rel(:,1:end-2);
-
-obj.local_dpx=sum(obj.dp.*obj.local_frame_x);
-obj.local_dpy=sum(obj.dp.*obj.local_frame_y);
-
-obj.local_dp=[obj.local_dpx;obj.local_dpy];
-
-obj.local_def_x=obj.local_dpx-obj.local_xo;
-
-obj.local_def_y=obj.local_dpy-obj.local_yo;
-
-% Scale up the 
-obj.f_axial=-obj.scale_up(obj.local_frame_x,obj.local_def_x)*obj.k_axial;
+%% Forces from i->ii / Left To Right (ltr)
+% Direct Forces from i->ii
+if force_type==0
+    % Option 0-> Force in the reltative (ltr) X direction
+    obj.f_axial=-obj.scale_up(obj.local_frame_x_ltr,obj.local_def_x_ltr)*obj.k_axial;
+elseif force_type==1
+    % Option 1-> Force in the direction between the particles
+    obj.f_axial= -obj.scale_up(obj.x_rel(:,2:end-1),obj.dp_def)*obj.k_axial;
+end
+% Transversal/Shear Forces from i->ii
 obj.f_trans=-obj.scale_up(obj.local_frame_y,obj.local_def_y.*obj.k_trans_vec);
-
+% Overal Forces from i->ii
 obj.f_i_ii=[obj.o obj.f_axial+obj.f_trans];             % The element in the left doesn't receive an elastic force from left to right, because there's nothingh to its left
 obj.f_i_ii_reactive=[-(obj.f_axial+obj.f_trans) obj.o]; % However it does receive the reactive force
 
-obj.local_frame_x=obj.x_rel(:,3:end);
-obj.local_frame_y=obj.y_rel(:,3:end);
-obj.local_dpx=sum(obj.dp.*obj.local_frame_x); 
-obj.local_dpy=sum(obj.dp.*obj.local_frame_y); 
-
-obj.local_def_x=obj.local_dpx-obj.local_xo; %If this value is positive means that the distance between i+1 and i gets bigger 
-obj.local_def_y=obj.local_dpy-obj.local_yo; %If this value is positive means that the  
-
-obj.f_axial=obj.scale_up(obj.local_frame_x,obj.local_def_x)*obj.k_axial;
+%% Forces from i->ii
+% Direct Forces from ii->i
+if force_type==0
+    % Option 0-> Force in the X direction
+    obj.f_axial=obj.scale_up(obj.local_frame_x_rtl,obj.local_def_x_rtl)*obj.k_axial;
+elseif force_type==1
+    % Option 1-> Force in the direction to the particle (Already calculated)
+    obj.f_axial= zeros(size(obj.f_axial));
+end
+% Transversal/Shear Forces
 obj.f_trans=obj.scale_up(obj.local_frame_y,obj.local_def_y.*obj.k_trans_vec);
-
-
+% Overal Forces from ii->i
 obj.f_ii_i=[obj.f_axial+obj.f_trans obj.o];% The element in the right doesn't receive an elastic force from right to left, because there's nothingh to its right
 obj.f_ii_i_reactive=[obj.o -(obj.f_axial+obj.f_trans)];% However it does receive the reactive force
 

@@ -1,4 +1,3 @@
-
 clear; clc;
 %profile on
 try
@@ -11,7 +10,7 @@ try
     %obj.dt_st=dt_st;
     T=5; %Maximum simulation time [s]
     %% Simulation Loop
-    profile on
+%     profile on
     tic
     for i=0:dt:T   
         if rem(i,1e-4)==0 % Plot every 0.1ms
@@ -43,6 +42,6 @@ try
     end
 catch
     
-profile viewer
-profile off
+% profile viewer
+% profile off
 end

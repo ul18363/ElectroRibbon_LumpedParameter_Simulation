@@ -67,6 +67,9 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         x_r0_c
         x_rend_c
         f_mask
+        dpo_mag
+        dp_mag
+        dp_def
     end
     
     methods
@@ -127,8 +130,8 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
             obj.dm=obj.m/obj.N;     % Mass for individual mass element
             obj.dl=obj.L/(obj.N-1); % Unstrained length of individual segment
             obj.k_axial=obj.E*obj.A/(obj.L*(obj.N-1));
-            disp(obj.GA)
-            disp(obj.dp)
+            %disp(obj.GA)
+            %disp(obj.dp)
             
             obj.k_trans_vec=(obj.GA)./vecnorm(obj.dp);%%%%%%%%%%%%
             obj.damp_factor=2e2; %Damping Factor
@@ -136,8 +139,8 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         end
 
         function set_material_properties(obj)
-            if isequal(obj.material,'steel')
-                disp('Material is steel')
+            if isequal(obj.material,'steel') || isequal(obj.material,'Steel AISI 4340') 
+                %disp('Material is steel')
                 obj.rho=7850; %Density [kg/m3]
                 obj.E=(190+210)/2 *10^9; %Modulus of Elasticity [GPa -> e9 N/m2]
                 obj.p_ratio=(0.27+0.30)/2; %Poission_ratio
@@ -150,6 +153,7 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
             obj.dpo=obj.dp;
             obj.local_xo=obj.dpo(1,:);
             obj.local_yo=obj.dpo(2,:);
+            obj.dpo_mag=sqrt([1 1]*obj.dpo.^2);
             obj.r_dpo=[obj.dp obj.o];    % Relative position of the next element to the right 
             obj.l_dpo=[obj.o -obj.dp];   % Relative position of the next element to the left
         end
@@ -160,6 +164,8 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         function scaled_vect= scale_up(~,vect,scale)
             scaled_vect=vect.*[scale;scale];
         end
+        
+        calculate_local_frames(obj);
         %obj= perform_timestep()
         
 %         scale_up=@  vect.*[scale;scale];

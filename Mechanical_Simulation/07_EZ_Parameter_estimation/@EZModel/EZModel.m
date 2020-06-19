@@ -64,8 +64,7 @@ classdef EZModel < handle
         function estimate_electrical_force(obj)
             obj.f_el_top=zeros(size(obj.top_plate.f)); % For now as zeros
             obj.f_el_btm=zeros(size(obj.bottom_plate.f)); % For now as zeros
-        end
-        
+        end  
         function entangle_plates(obj)
             f=(obj.top_plate.f(:,1)+obj.bottom_plate.f(:,1))/2;
             obj.top_plate.f(:,1)=f;
@@ -74,6 +73,7 @@ classdef EZModel < handle
             % the accelerations of the ends
             % f_e=f1_ne+f2_ne->f1_e=f_e*m1/(m1+m2);f2_e=f_e*m2/(m1+m2);
         end
+        %function estimate_parameters(obj)
     end
 end
 
