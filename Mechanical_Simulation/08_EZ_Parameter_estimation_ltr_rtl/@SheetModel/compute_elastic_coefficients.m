@@ -9,6 +9,9 @@ switch obj.axial_type
     case 'symbolic'
         obj.k_axial_vec=sym('Ka',dims);
     case 'manual'
+    
+    case 'deformation_dependent'
+    obj.k_axial_vec=polyval(obj.pol_axial,dp_def);
 end
 %shear_type='inverse_to_length';
 switch obj.shear_type
@@ -19,6 +22,9 @@ switch obj.shear_type
     case 'symbolic'
         obj.k_trans_vec=sym('Kt',dims);
     case 'manual'
+        
+    case 'angle_dependent'
+        obj.k_trans_vec=polyval(obj.pol_trans,obj.angles);
 end
 end
 

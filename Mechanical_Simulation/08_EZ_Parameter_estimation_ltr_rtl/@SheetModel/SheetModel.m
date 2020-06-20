@@ -16,6 +16,7 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         T
         a
         axial_type
+        angles
         count
         damp_factor
         dl
@@ -67,6 +68,8 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         p
         p_ratio
         po
+        pol_axial
+        pol_trans
         r_dpo
         rho
         shear_type
