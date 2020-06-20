@@ -53,6 +53,6 @@ model.component('comp1').mesh('mesh1').autoMeshSize(1);
 obj.define_study_and_solver(model)
 
 obj.define_measurements(model);
-%obj.create_comsol_plot(model);
 
+obj.create_comsol_plot(model);
 end

@@ -17,6 +17,30 @@ classdef Param_Estimator < handle
         thickness
         mass_load
         og_p
+        real_x
+        real_y
+        real_u
+        real_v
+        real_p
+        real_x_btm
+        real_y_btm
+        real_u_btm
+        real_v_btm
+        real_p_btm
+        real_x_tp
+        real_y_tp
+        real_u_tp
+        real_v_tp
+        real_p_tp
+        tp_ixs
+        btm_ixs
+        real_static_coeffs
+        matrix_sys_A
+        independent_forces_b
+        real_static_axial_coeffs
+        real_static_trans_coeffs
+        eqns
+        vars
     end
     
     methods
@@ -52,25 +76,26 @@ classdef Param_Estimator < handle
             x=[x_side, flip(x_side)];
             y=[ones(1,N)*obj.thickness,zeros(1,N)];
             obj.og_p=[x' y'];
-            obj.model=obj.create_model(obj.og_p,obj.width,obj.M,N);
+            obj.model=obj.create_model(obj.og_p,obj.width,obj.M,obj.N);
         end
-        
+        create_comsol_plot(obj,model);
+        show_comsol_plot(obj);
         function set_damping_factor(obj,damping_factor)
             obj.plate.damp_factor=damping_factor; %Damping Factor
         end
-        function calculate_all_forces(obj)
-            obj.plate.calculate_all_forces(); % Calculate Forces on the plate
-            obj.calculate_external_forces(); % Calculate forces induced by the hanging mass
-        end
+        calculate_all_forces(obj);
         perform_timestep(obj,dt);
-        function calculate_external_forces(obj)
-            % Force of the load
-            f_free_tip=obj.plate.f(:,end);
-            dm=obj.plate.dm;
-            % Add Additionl Mass
-            f_loaded_tip=(f_free_tip+obj.M*obj.g)*dm/(obj.M+dm);
-            % Replace resulting force
-            obj.plate.f(:,end)=f_loaded_tip;
+        calculate_external_forces(obj);
+        obtain_static_coefficients(obj);
+        set_elastic_coefficients(obj);
+        function update_model(obj)
+            obj.model.component('comp1').geom('geom1').feature('pol1').set('table', obj.og_p);
+            obj.model.component('comp1').physics('solid').prop('d').set('d', obj.width); %Add Sheet width
+            obj.model.component('comp1').physics('solid').feature('adm1').set('mTot', obj.M);            
+            obj.model.component('comp1').physics('solid').feature('adm1').selection.set(2*obj.N);
+            obj.model.component('comp1').physics('solid').feature('rig1').selection.set(2*obj.N);
+            obj.model.component('comp1').geom('geom1').run;
+            obj.model.sol('sol1').runAll;
         end
         %function estimate_parameters(obj)
     end

@@ -14,8 +14,9 @@ y_max=obj.plate.p(2,end);
 close all
 plot_type=0; % 0- Snapshot at give time of all geometry
 % 1- End effector position over time
+profile on
 for i=0:dt:T
-    if rem(i,1e-5)==0 % Plot every 0.1ms
+    if rem(i,1e-4)==0 % Plot every 0.1ms
         toc
         %hold off
         %             subplot(2,1,2)
