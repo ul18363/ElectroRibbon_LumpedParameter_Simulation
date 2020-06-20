@@ -18,3 +18,7 @@ Mechanical_Simulation/Mass_Spring/links.xcf
 *.lock
 
 *.mat
+
+*.zip
+
+*.fig
