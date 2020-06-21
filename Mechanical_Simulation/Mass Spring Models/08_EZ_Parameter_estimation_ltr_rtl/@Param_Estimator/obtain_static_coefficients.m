@@ -1,0 +1,68 @@
+function obtain_static_coefficients(obj)
+real_p=obj.real_p_btm;
+obj.plate.p=real_p; %Assign the real position to the plate model
+
+%estimation_type="Symbolic Fix coefficients";
+
+%% Define the sheet model to be optimized
+if isequal(obj.estimation_type,"Symbolic Fix coefficients")
+    obj.plate.shear_coefficient_source="edges";
+    obj.plate.shear_type='symbolic';
+    obj.plate.axial_type='symbolic';
+    axial_size=obj.plate.N-1;
+    trans_size=obj.plate.N-1;
+elseif isequal(obj.estimation_type,"Polynomial coefficient estimation")
+    axial_size=5;
+    trans_size=5;
+    obj.plate.pol_axial=ones([1 axial_size]);
+    obj.plate.pol_trans=ones([1 trans_size]);
+    obj.plate.shear_coefficient_source="particles";
+    obj.plate.shear_type='symbolic angle dependent polynomial';
+    obj.plate.axial_type='symbolic deformation dependent polynomial';
+end
+    obj.calculate_all_forces();
+    f=obj.plate.f(:,2:end); %The first element is fixed so not much interesting stuff there
+    eqns=f(:);
+    vars=symvar(obj.plate.f.');%[obj.plate.k_axial_vec,obj.plate.k_trans_vec]; %Not really needed probly but still
+    %constr=vars;
+    for i=1:length(vars) % Set constraints
+        %constr(i)= (>0);
+        %	assume(vars(i),'positive')
+    end
+    for i=1:length(eqns) % Equate All forces to 0
+        eqns(i)= (eqns(i)==0);
+    end
+    obj.vars=vars;
+    obj.eqns=eqns;
+    [A,b] = equationsToMatrix(eqns,vars); %Let's see if this helps
+    obj.A=A;
+    obj.b=b;
+    A_e=eval(A);
+    b_e=eval(b);
+    obj.matrix_sys_A =A_e;
+    obj.independent_forces_b=b_e;
+    
+    if  size(obj.matrix_sys_A,2)~=size(obj.matrix_sys_A,1) ||det(A_e)==0
+        disp("Matrix is not square or Determinant is 0. Multiple, None or Infinite solutions may exist")
+    end
+    
+    if (rank([A_e,b_e]) == rank(A_e))
+        disp("Solution can be found.")
+        coeffs=eval(linsolve(A,b));
+        
+        obj.real_static_coeffs=coeffs;
+        obj.approx_coeffs=coeffs;
+        obj.real_static_axial_coeffs=coeffs(1:axial_size);
+        obj.real_static_trans_coeffs=coeffs(axial_size+1:axial_size+trans_size);
+    else
+        disp("Target columns is not linearly dependent with matrix columns, exact solution is not available")
+        obj.approx_coeffs=pinv(A_e)*b_e;
+        obj.approx_static_axial_coeffs=obj.approx_coeffs(1:axial_size);
+        obj.approx_static_trans_coeffs=obj.approx_coeffs(axial_size+1:axial_size+trans_size);
+        
+        %obj.real_static_coeffs=[];
+        %obj.real_static_axial_coeffs=[];
+        %obj.real_static_trans_coeffs=[];
+    end
+    
+end
