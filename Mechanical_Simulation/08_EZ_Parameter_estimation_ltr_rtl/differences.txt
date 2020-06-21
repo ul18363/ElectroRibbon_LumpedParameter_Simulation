@@ -1,6 +1,0 @@
-The previous model considered the transversal/shear coefficients between two particles the same, regardless if it was "left to right"/i->ii 
-or "right to left"/ii->i.
-
-An observation from this model is that there is no positive (stable) set of elastic coefficients that can satisfy the force equations.
-
-An argument is that the shear coefficient may vary with the angle of the geometry. That possibility is the one that is pursued in this try.

@@ -7,11 +7,11 @@ obj.retrieve_real_final_position()
 disp('M=0')
 disp(obj.real_p_tp(:,end))
 %%
-obj.M=0.01; 
-% 0.1 -> Highly deformed
-obj.update_model()
-obj.retrieve_real_final_position()
-disp(['M=',num2str(obj.M)])
-disp(obj.real_p_tp(:,end))
-obj.show_comsol_plot()
+% obj.M=0.01; 
+% % 0.1 -> Highly deformed
+% obj.update_model()
+% obj.retrieve_real_final_position()
+% disp(['M=',num2str(obj.M)])
+% disp(obj.real_p_tp(:,end))
+% obj.show_comsol_plot()
 obj.obtain_static_coefficients()

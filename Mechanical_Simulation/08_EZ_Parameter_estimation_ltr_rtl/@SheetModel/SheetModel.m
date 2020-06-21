@@ -85,6 +85,8 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         y
         y0
         y_rel
+        axial_force_local_direction
+        shear_force_type
     end
     
     methods
@@ -144,13 +146,26 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         function generate_discrete_model(obj)
             obj.axial_type='constant'; % Axial elastic coefficient is constant
             obj.shear_type='inverse_to_length'; %Transverse/Shear elastic coefficient is inverse to length
+            
             obj.dm=obj.m/obj.N;     % Mass for individual mass element
             obj.dl=obj.L/(obj.N-1); % Unstrained length of individual segment
             obj.k_axial=obj.E*obj.A/(obj.L*(obj.N-1)); %Constant coefficient by material properties
             obj.k_trans=obj.G*obj.A/obj.dl; % Constant shear coefficient by material coefficient (Doesn't take into account beam profile)
-            obj.k_trans_vec=(obj.GA)./vecnorm(obj.dp);%Shear coefficient Formula (Doesn't take into account beam profile)
+            %obj.k_trans_vec=(obj.GA)./vecnorm(obj.dp);%Shear coefficient Formula (Doesn't take into account beam profile)
             obj.damp_factor=2e2; %Damping Factor
+            obj.axial_force_local_direction=1; % Type 0: Direct forces in the direction of local_x (1 per way)
+                                               % Type 1: Direct forces in the direction of dp (way is shared)
+            
+            if isequal(obj.shear_type,"angle_dependent") || isequal(obj.shear_type,"symbolic_polynomial")
+                obj.k_trans_vec=ones([1 obj.N])*(obj.GA); %Shear coefficient Formula (Doesn't take into account beam profile)(Size N, distinguishes ltr or rtl)
+            else
+                obj.k_trans_vec=(obj.GA)./vecnorm(obj.dp);%Shear coefficient Formula (Doesn't take into account beam profile) (Size N-1, not distinguis ltr or rtl)
+            end
+            obj.pol_trans=[0 1]*obj.k_trans; % Shear elastic coefficient polynomial expression by default a linear expression (with constant default value)
+            obj.pol_axial=[0 1]*obj.k_axial; % Direct elastic coefficient polynomial expression by default a linear expression (with constant default value)
+            
         end
+        
         
         function set_material_properties(obj)
             if isequal(obj.material,'steel') || isequal(obj.material,'Steel AISI 4340')

@@ -1,8 +1,8 @@
 %% Estimate difference in positions
 function calculate_elastic_forces(obj)
-direct_force_type=1; % Type 0: Direct forces in the direction of local_x (1 per way)
+obj.direct_force_type=1; % Type 0: Direct forces in the direction of local_x (1 per way)
 % Type 1: Direct forces in the direction of dp (way is shared)
-shear_force_type=0; % Type 0: Elastic Coefficient is independent of ltr or rtl
+obj.shear_force_type=0; % Type 0: Elastic Coefficient is independent of ltr or rtl
 % Type 1: Elastic coefficient depends on ltr or rtl
 
 %% Compute Local Geomtry and deformations
@@ -21,19 +21,19 @@ obj.compute_elastic_coefficients();
 
 %% Forces from i->ii / Left To Right (ltr)
 % Direct Forces from i->ii
-if direct_force_type==0
+if obj.axial_force_local_direction==0
     % Option 0-> Force in the reltative (ltr) X direction
     obj.f_axial_ltr=-obj.scale_up(obj.local_frame_x_ltr,obj.local_def_x_ltr.*obj.k_axial_vec);
-elseif direct_force_type==1
+elseif obj.axial_force_local_direction==1
     % Option 1-> Force in the direction between the particles
     obj.f_axial_ltr= -obj.scale_up(obj.x_rel(:,2:end-1),obj.dp_def.*obj.k_axial_vec);
 end
 
 % Transversal/Shear Forces from i->ii
-if shear_force_type == 0
-obj.f_trans_ltr=-obj.scale_up(obj.local_frame_y_ltr,obj.local_def_y_ltr.*obj.k_trans_vec);
-elseif shear_force_type==1
-obj.f_trans_ltr=-obj.scale_up(obj.local_frame_y_ltr,obj.local_def_y_ltr.*obj.k_trans_vec(1:end-1));
+if isequal(obj.shear_type,"angle_dependent") || isequal(obj.shear_type,"symbolic_polynomial")
+    obj.f_trans_ltr=-obj.scale_up(obj.local_frame_y_ltr,obj.local_def_y_ltr.*obj.k_trans_vec(1:end-1));% For angle dependent forces the angle that gives the coefficient is the angle in the left
+else
+    obj.f_trans_ltr=-obj.scale_up(obj.local_frame_y_ltr,obj.local_def_y_ltr.*obj.k_trans_vec);
 end
 % If needed they can be added later on for analysis
 % f_trans_ltr_active=[obj.o obj.f_trans_ltr]
@@ -47,18 +47,18 @@ obj.f_i_ii_reactive=[-(obj.f_axial_ltr+obj.f_trans_ltr) obj.o]; % However it doe
 
 %% Forces from ii->i/ Right To Left (rtl)
 % Direct Forces from ii->i
-if direct_force_type==0
+if obj.axial_force_local_direction==0
     % Option 0-> Force in the X direction
     obj.f_axial_rtl=obj.scale_up(obj.local_frame_x_rtl,obj.local_def_x_rtl)*obj.k_axial;
-elseif direct_force_type==1
+elseif obj.axial_force_local_direction==1
     % Option 1-> Force in the direction to the particle (Already calculated)
     obj.f_axial_rtl= zeros(size(obj.f_axial_ltr));
 end
 % Transversal/Shear Forces
-if shear_force_type == 0
+if isequal(obj.shear_type,"angle_dependent") || isequal(obj.shear_type,"symbolic_polynomial")
+obj.f_trans_rtl=obj.scale_up(obj.local_frame_y_rtl,obj.local_def_y_rtl.*obj.k_trans_vec(2:end)); % For angle dependent forces the angle that gives the coefficient is the angle in the right
+else
 obj.f_trans_rtl=obj.scale_up(obj.local_frame_y_rtl,obj.local_def_y_rtl.*obj.k_trans_vec);
-elseif shear_force_type==1
-obj.f_trans_rtl=obj.scale_up(obj.local_frame_y_rtl,obj.local_def_y_rtl.*obj.k_trans_vec(2:end));
 end
 
 % If needed they can be added later on for analysis
