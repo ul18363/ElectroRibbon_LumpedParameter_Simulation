@@ -33,7 +33,7 @@ else
 end
 f_gravity=obj.plate.f_gravity(:,link);
 %% Legends
-close all
+%close all
 legends={'f axial ltr active','f trans ltr active','f axial rtl reactive','f trans rtl reactive','f axial rtl active','f trans rtl active','f axial ltr reactive','f trans ltr reactive','f external','f gravity'};
 
 vecs=[f_axial_ltr_active,f_trans_ltr_active,f_axial_rtl_reactive,f_trans_rtl_reactive,f_axial_rtl_active,f_trans_rtl_active,f_axial_ltr_reactive,f_trans_ltr_reactive,f_external,f_gravity];

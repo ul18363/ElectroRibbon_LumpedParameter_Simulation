@@ -4,7 +4,7 @@ obj.plate.p=real_p; %Assign the real position to the plate model
 
 obj.plate.pol_axial=ones([1 axial_size]);
 obj.plate.pol_trans=ones([1 trans_size]);
-obj.plate.shear_coefficient_source="particles";
+obj.plate.shear_coefficient_source="particles";%particles
 obj.plate.shear_type='symbolic angle dependent polynomial';
 obj.plate.axial_type='symbolic deformation dependent polynomial';
 

@@ -30,7 +30,9 @@ switch obj.shear_type
         obj.k_trans_vec=polyval(obj.pol_trans,obj.angles);
         
     case 'symbolic angle dependent polynomial' %Usually used for parameter estimation, not to be used in loop
-        %Axial var: abs(obj.angles)// obj.angles
+        % Axial var: abs(obj.angles)// obj.angles // 
+        % inverse of length of edge 1./obj.dp_mag
+        % length of deformation of edgfe obj.dp_def
         obj.k_trans_vec=create_symbolic_polynomial('Kt',obj.angles,length(obj.pol_trans)); %The Elastic coefficient is the polynomial & The order of the polynomial is unchanged
 end
 end
