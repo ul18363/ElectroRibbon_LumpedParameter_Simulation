@@ -18,9 +18,9 @@ if any(ixs) % If all particles are still, there is no risk of this kind of oscil
     dm=obj.dm;
     dts=2*(dm./v)/c;
     reco_dt1=min(dts);
-%     if reco_dt1<dt
+    if reco_dt1<dt
 %         disp('Risk of oscillation class 1')
-%     end
+    end
 end
 %% 2. Divergence from Direct oscillations
 % This comes when direct forces oscillations become bigger and bigger.
@@ -31,9 +31,9 @@ dp_v_rel=sum(dp_x.*dp_v);
 ixs=(abs(dp_v_rel)>0)&(sign(dp_v_rel)~=sign(dp_def))& (abs(dp_def)>0); %Velocity needs to be bigger than 0 and of different sign of deformation. And deformation needs to be bigger than 0 too
 if any(ixs) % Velocity goes against deformation, necessary condition for divergence
     reco_dt2=min(2* abs(dp_def(ixs))./abs(dp_v_rel(ixs)));
-%     if dt>reco_dt2
-%         disp('Risk of oscillation class 2')
-%     end
+    if false && dt>reco_dt2 
+        disp('Risk of oscillation class 2')
+    end
 end
 %% 3. Divergence from Shear oscillations
 % This oscillation comes to be when the shear forces cause ever increasing
@@ -55,9 +55,9 @@ dp_v_rel=sum(y_ltr.*dp_v);
 ixs=(abs(dp_v_rel)>0)&(sign(dp_v_rel)~=sign(y_def))& (abs(y_def)>0) ; %Velocity needs to be bigger than 0 and of different sign of deformation. And deformation needs to be bigger than 0
 if any(ixs)
     reco_dt3_ltr=min(2* abs(y_def(ixs))./abs(dp_v_rel(ixs)));
-%     if dt>reco_dt3_ltr
-%     disp('Risk of oscillation class 3 LTR')
-%     end
+    if false &&  dt>reco_dt3_ltr
+    disp('Risk of oscillation class 3 LTR')
+    end
 end
 
 %Check for RTL
@@ -68,16 +68,17 @@ dp_v_rel=sum(y_rtl.*dp_v);
 ixs=(abs(dp_v_rel)>0)&(sign(dp_v_rel)~=sign(y_def))& (abs(y_def)>0) ; %Velocity needs to be bigger than 0 and of different sign of deformation. And deformation needs to be bigger than 0
 if any(ixs)
     reco_dt3_rtl=min(2* abs(y_def(ixs))./abs(dp_v_rel(ixs)));
-%     if dt>reco_dt3_rtl
-%     disp('Risk of oscillation class 3 rtl')
-%     end
+    if false &&  dt>reco_dt3_rtl
+    disp('Risk of oscillation class 3 rtl')
+    end
 end
 reco_dt3=min([reco_dt3_ltr reco_dt3_rtl]);
 %%
 
-reco_dt=min([reco_dt1,reco_dt2,reco_dt3,dt]);
-positive_action=true;
-if positive_action && (reco_dt<dt)
+%reco_dt=min([reco_dt1,reco_dt2,reco_dt3,dt]); %Ponder all divergences
+reco_dt=min([reco_dt1,dt]); % Ponder only class 1
+positive_action=false;
+if positive_action && (reco_dt1<dt)
    obj.v=0*obj.v; 
 end
 end

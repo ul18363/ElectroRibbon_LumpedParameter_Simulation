@@ -23,13 +23,41 @@ countdown_th=1e4;
 countdown=1e4;
 dt_timestep=dt;
 plot_results=false;
+drunk_scale=1.01;
+drunk_scale2=1.01;
 while T_Sim<T
+    % First do a backup
+    p_bu=obj.plate.p;
+    v_bu=obj.plate.v;
+    dt_timestep_reco=0;
+    tries=0;
+    while dt_timestep_reco~=dt_timestep
     obj.calculate_all_forces();
-    %dt_timestep=safety_factor*obj.plate.analyze_divergence(dt);
+    
+    obj.perform_timestep(dt_timestep);
+    %obj.calculate_all_forces();
+    dt_timestep_reco=obj.plate.analyze_divergence(dt_timestep);
+    %dt_timestep
+    %dt_timestep_reco
+        if dt_timestep_reco~=dt_timestep %If divergence is detected 
+            tries=tries+1;
+            dt_timestep=dt_timestep/drunk_scale; % Reduce timestep
+            obj.plate.p=p_bu; %Reset position of particles
+            obj.plate.v=v_bu; %Reset velocities of particles
+            %disp(dt_timestep)
+        elseif tries==0 %If in the first go was stable 
+            dt_timestep=dt_timestep*drunk_scale; % Increase timestep
+            break
+        end
+    %dt_timestep_reco=obj.plate.analyze_divergence(dt_timestep);
+        
+    end
+    %obj.perform_timestep(dt_timestep); Perform Timestep
+    %dt_timestep=dt_timestep_reco;
     %countdown=countdown-1;
-    %     if dt_timestep~=dt
-    %      disp(dt_timestep)
-    %     end
+%     if dt_timestep_reco~=dt
+%        disp(dt_timestep_reco)
+%     end
     %disp(obj.plate.f)
     if any(isnan(obj.plate.f),'all')
         break
@@ -47,7 +75,13 @@ while T_Sim<T
         last_refresh=T_Sim;
         %         countdown=countdown_th;
         toc
+        if toc<0.5
+            obj.set_damping_factor(obj.plate.damp_factor*drunk_scale2); %Increase damping factor if simulation is fast
+        else
+            obj.set_damping_factor(obj.plate.damp_factor/drunk_scale2); %Decrease damping factor if simulation is slow
+        end
         
+        disp(['Velocity magnitude :',num2str(sqrt(sum(v_bu.^2,'all')))])
         hold off
         %y_min=min(y_min,obj.plate.p(2,end));
         if plot_type==0
@@ -84,5 +118,6 @@ while T_Sim<T
         tic
     end
     T_Sim=T_Sim+dt_timestep;
-    obj.perform_timestep(dt_timestep);
+    %dt_timestep
+    %obj.perform_timestep(dt_timestep);
 end

@@ -14,9 +14,9 @@ h.obj.update_model();
 og_GA=h.obj.plate.GA;
 og_k_axial=h.obj.plate.k_axial;
 h.obj.retrieve_real_final_position();
-% 
+%
 
-scale_axial=scale;
+scale_axial=1;
 scale_trans=scale;
 h.obj.plate.k_axial=og_k_axial*scale_axial;
 h.obj.plate.GA=og_GA*scale_trans;
@@ -26,11 +26,11 @@ h.obj.plate.GA=og_GA*scale_trans;
 t_refresh=10^-2;
 T_Sim=0;
 last_refresh=T_Sim;
-% SIMULATION
+%% SIMULATION
+drunk_scale=1.01;
+drunk_scale2=1.01;
+dt_timestep=dt;
     function do_sim_timestep(dt)
-        T_Sim=T_Sim+dt;
-        h.obj.calculate_all_forces();
-        h.obj.perform_timestep(dt);
     end
 
     function plot_results()
@@ -110,7 +110,7 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[15 1.5 4 1],'String','Resume/Stop',...
     'Callback',@sim_btn_callback);%,...%'Callback',@sh_updateSlider);
 
-    function sim_btn_callback(hObject, ~, ~)  
+    function sim_btn_callback(hObject, ~, ~)
         if get(hObject,'Value')
             disp("Start")
         else
@@ -121,10 +121,10 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
 h.refresh_sim_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
     'Position',[10 1 2 1],'String',sprintf('%.2e',t_refresh),...
     'Callback',@refresh_sim_box_callback);
- uicontrol(sc_panel,'style','text','Units','centimeters' ,...
+uicontrol(sc_panel,'style','text','Units','centimeters' ,...
     'Position',[8 0.8 2 1],'String','Refresh T:');
 
-    function refresh_sim_box_callback(hObject, ~, ~)  
+    function refresh_sim_box_callback(hObject, ~, ~)
         raw=get(hObject,'String');
         [num, status] = str2num(raw);
         if status
@@ -137,9 +137,9 @@ h.refresh_sim_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
 h.timestep_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
     'Position',[10 2 2 1],'String',sprintf('%.2e',dt),...
     'Callback',@timestep_box_callback);
- uicontrol(sc_panel,'style','text','Units','centimeters' ,...
+uicontrol(sc_panel,'style','text','Units','centimeters' ,...
     'Position',[8 1.8 2 1],'String','Timestep:');
-    function timestep_box_callback(hObject, ~, ~)  
+    function timestep_box_callback(hObject, ~, ~)
         raw=get(hObject,'String');
         [num, status] = str2num(raw);
         if status
@@ -178,16 +178,41 @@ while 1
         update_statistics()
     end
     
-    if get(h.stop_btn,'Value')
-        do_sim_timestep(dt)
-        %entered=entered+1;
-        %disp(T_Sim)
-        %plot([1,2],[3,4])
+     if get(h.stop_btn,'Value')
+        %% Simulation steps goes here
+        
+        % First do a backup
+        p_bu=h.obj.plate.p;
+        v_bu=h.obj.plate.v;
+        
+        
+        dt_timestep_reco=0;
+        tries=0;
+%         h.obj.calculate_all_forces();
+%         h.obj.perform_timestep(dt);
+        while dt_timestep_reco~=dt_timestep
+            h.obj.calculate_all_forces();
+            h.obj.perform_timestep(dt_timestep);
+            dt_timestep_reco=h.obj.plate.analyze_divergence(dt_timestep);
+            if dt_timestep_reco~=dt_timestep %If divergence is detected
+                tries=tries+1;
+                dt_timestep=dt_timestep/drunk_scale; % Reduce timestep
+                h.obj.plate.p=p_bu; %Reset position of particles
+                h.obj.plate.v=v_bu; %Reset velocities of particles
+                %disp(dt_timestep)
+            elseif tries==0 %If in the first go was stable
+                dt_timestep=dt_timestep*drunk_scale; % Increase timestep
+                break
+            end
+            %dt_timestep_reco=obj.plate.analyze_divergence(dt_timestep);
+            
+        end
+        T_Sim=T_Sim+dt_timestep;
         if T_Sim> last_refresh+t_refresh % If is time to refresh the picture
             last_refresh=T_Sim;
             plot_results()
         end
-
+        
     end
 end
 
