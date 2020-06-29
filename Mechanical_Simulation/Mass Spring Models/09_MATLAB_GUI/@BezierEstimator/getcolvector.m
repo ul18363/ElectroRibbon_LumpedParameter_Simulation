@@ -8,7 +8,7 @@
 
 function vout=getcolvector(vin)
 
-if(~isvec(vin)  )
+if(~BezierEstimator.isvec(vin)  )
     error('input must be a vector');    
 end
 

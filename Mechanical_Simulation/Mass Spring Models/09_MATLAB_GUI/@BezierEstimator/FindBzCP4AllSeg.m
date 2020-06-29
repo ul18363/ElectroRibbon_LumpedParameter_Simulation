@@ -26,9 +26,9 @@ for k=1:length(SegIndexIn)-1
     toRow=SegIndexIn(k+1);
     size(Mat(fromRow:toRow,:));
     if (strcmpi(ptype,'u') || strcmpi(ptype,'uniform') )
-        [p0,p1,p2,p3,t]= FindBezierControlPointsND(Mat(fromRow:toRow,:),'u'); %uniform parameterization
+        [p0,p1,p2,p3,t]= BezierEstimator.FindBezierControlPointsND(Mat(fromRow:toRow,:),'u'); %uniform parameterization
     else
-        [p0,p1,p2,p3,t]= FindBezierControlPointsND(Mat(fromRow:toRow,:));    %chord-length parameterization
+        [p0,p1,p2,p3,t]= BezierEstimator.FindBezierControlPointsND(Mat(fromRow:toRow,:));    %chord-length parameterization
     end   
 
     p0mat(k,:)=p0; 

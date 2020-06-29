@@ -42,7 +42,7 @@ n=size(p,1);              % number of rows in p
 if (strcmpi(ptype,'u') || strcmpi(ptype,'uniform') )
     [t]=linspace(0,1,n);      % uniform parameterized values (normalized b/w 0 to 1)
 else
-    [t]=ChordLengthNormND(p); % chord-length parameterized values (normalized b/w 0 to 1)
+    [t]=BezierEstimator.ChordLengthNormND(p); % chord-length parameterized values (normalized b/w 0 to 1)
 end
 
 P0=p(1,:);       % (at t=0 => P0=p1)

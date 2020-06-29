@@ -48,7 +48,7 @@ for k=1:length(NVec)-1
         tloc=tloc(2:end);
     end  
     
-    MatLocalInterp=bezierInterp( p0mat(k,:),p1mat(k,:),p2mat(k,:),p3mat(k,:),tloc);    
+    MatLocalInterp=BezierEstimator.bezierInterp( p0mat(k,:),p1mat(k,:),p2mat(k,:),p3mat(k,:),tloc);    
     MatGlobalInterp=[MatGlobalInterp; MatLocalInterp]; % row wise concatenation
     firstSegment=0;
 end

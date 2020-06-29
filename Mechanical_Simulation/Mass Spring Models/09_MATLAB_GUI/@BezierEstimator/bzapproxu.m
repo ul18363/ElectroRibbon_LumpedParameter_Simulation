@@ -58,17 +58,17 @@ if(MxAllowSqD<0 )
     error('Max. Allowed Square Distance should be >= 0');    
 end
 
-if( ~isvec(ibi) )
+if( ~BezierEstimator.isvec(ibi) )
     error('arg3 must be row OR column vector');    
 end
-ibi=getcolvector(ibi);
+ibi=BezierEstimator.getcolvector(ibi);
 ibi=[ibi; 1; size(Mat,1)]; % make sure first & last are included
 ibi=unique(ibi);           % sort and remove duplicates if any 
 
-[p0mat,p1mat,p2mat,p3mat,ti]=FindBzCP4AllSeg(Mat,ibi,'u');
-[MatI]=BezierInterpCPMatSegVec(p0mat,p1mat,p2mat,p3mat,ibi,ti);
+[p0mat,p1mat,p2mat,p3mat,ti]=BezierEstimator.FindBzCP4AllSeg(Mat,ibi,'u');
+[MatI]=BezierEstimator.BezierInterpCPMatSegVec(p0mat,p1mat,p2mat,p3mat,ibi,ti);
 
-[sqDistAry,indexAryGlobal]=MaxSqDistAndInd4EachSegbw2Mat(Mat,MatI, ibi);
+[sqDistAry,indexAryGlobal]=BezierEstimator.MaxSqDistAndInd4EachSegbw2Mat(Mat,MatI, ibi);
 sqDistMat=[sqDistAry',indexAryGlobal'];
 % localIndex is index of row in sqDistMat that contains MxSqD
 [MxSqD, localIndex]=max(sqDistMat(:,1)); 
@@ -84,12 +84,12 @@ while(MxSqD > MxAllowSqD)
     %% Finding range of ibi that would be affected by adding a new
     %% point at max-square-distance postion.
     %% If kth row mataches then get atmost k-1 to k+1 rows of ibi.
-    [EffinitialbreaksIndex]=FindGivenRangeMatchedMat([ibi],[1 ; MaxSqDistIndex], 1); 
+    [EffinitialbreaksIndex]=BezierEstimator.FindGivenRangeMatchedMat([ibi],[1 ; MaxSqDistIndex], 1); 
      
     %% Finding control points of two new segments (obtained by breaking a segment)  
     %% Since we are passing EffinitialbreaksIndex, FindBzCP4AllSeg will only take
     %% relevant segments data from Mat.
-    [p0matN,p1matN,p2matN,p3matN,tiN]=FindBzCP4AllSeg(...
+    [p0matN,p1matN,p2matN,p3matN,tiN]=BezierEstimator.FindBzCP4AllSeg(...
                                       Mat,EffinitialbreaksIndex,'u');
     
     %% Combining new and old control point values (old + new + old ).
@@ -105,7 +105,7 @@ while(MxSqD > MxAllowSqD)
     end     
     
     %% Bezier Interpolatoin to new segments  
-    [MatINew]=BezierInterpCPMatSegVec(p0matN,p1matN,p2matN,p3matN,...
+    [MatINew]=BezierEstimator.BezierInterpCPMatSegVec(p0matN,p1matN,p2matN,p3matN,...
                                       EffinitialbreaksIndex,tiN);
     
     si=EffinitialbreaksIndex(1);  % intrp. values ibi(1:si) are already computed
@@ -116,7 +116,7 @@ while(MxSqD > MxAllowSqD)
     MatI=[MatI(1:si-1,:); MatINew; MatI(ei+1:end,:)];     
     
     %% now we would find the max-square-distance of affected segments only  
-    [sqDistAryN,indexAryGlobalN]=MaxSqDistAndInd4EachSegbw2Mat(...
+    [sqDistAryN,indexAryGlobalN]=BezierEstimator.MaxSqDistAndInd4EachSegbw2Mat(...
                                  Mat,MatI, EffinitialbreaksIndex ); % new
     sqDistMatN=[sqDistAryN',indexAryGlobalN'];      % new mat
 

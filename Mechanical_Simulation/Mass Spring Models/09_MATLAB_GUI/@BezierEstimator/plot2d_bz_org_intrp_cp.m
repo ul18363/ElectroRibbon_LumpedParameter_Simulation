@@ -4,11 +4,11 @@
 % p0mat,p1mat,p2mat,p3mat: control points
 
 function plot2d_bz_org_intrp_cp(Mat,MatI,p0mat,p1mat,p2mat,p3mat)
-
+figure
 lw=2; %line width
-
-plot(Mat(:,1),Mat(:,2),'b','Linewidth',lw);               % original data
-plot(MatI(:,1),MatI(:,2),'g','Linewidth',lw);                                     % interpolated
+plot(Mat(:,1),Mat(:,2),'g-o','Linewidth',lw);               % original data
+hold on
+plot(MatI(:,1),MatI(:,2),'b:x','Linewidth',lw/4);                                     % interpolated
 bpx=[p0mat(:,1);p3mat(end,1)];
 bpy=[p0mat(:,2);p3mat(end,2)];
 plot(bpx,bpy,'ro','Linewidth',lw);                                                
