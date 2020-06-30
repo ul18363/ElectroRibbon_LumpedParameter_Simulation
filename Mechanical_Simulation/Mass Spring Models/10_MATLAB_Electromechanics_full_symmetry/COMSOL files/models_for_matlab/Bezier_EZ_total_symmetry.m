@@ -12,7 +12,7 @@ model = ModelUtil.create('Model');
 model.modelPath('/home/bruno/Repositories/Personal/MATLAB_Dissertation/Mechanical_Simulation/Mass Spring Models/09_MATLAB_GUI/COMSOL files/models_for_matlab');
 
 model.label('Bezier_EZ_total_symmetry.mph');
-%% Parameters
+
 model.param.set('thickness', '100e-6[m]');
 model.param.set('voltage', '12e3[V]');
 model.param.set('gap', '50e-6[m]');
@@ -26,7 +26,7 @@ model.component.create('comp1', true);
 model.component('comp1').geom.create('geom1', 2);
 
 model.component('comp1').mesh.create('mesh1');
-%% Define Geometry
+
 model.component('comp1').geom('geom1').create('cb1', 'CubicBezier');
 model.component('comp1').geom('geom1').feature('cb1').set('p', {'0' '0.0154' '0.0262' '0.0416'; '0' '-9.3928e-4' '-0.0151' '-0.016'});
 model.component('comp1').geom('geom1').create('cb2', 'CubicBezier');
@@ -179,7 +179,7 @@ model.result('pg5').feature('lngr5').set('xdata', 'reversedarc');
 model.result('pg5').feature('lngr5').selection.set([10]);
 model.result('pg5').feature('lngr5').set('expr', 'l');
 model.result.export.create('plot1', 'Plot');
-%% Solution
+
 model.sol('sol1').attach('std1');
 model.sol('sol1').feature('s1').feature('fc1').set('linsolver', 'd1');
 model.sol('sol1').feature('s1').feature('d1').label('Suggested Direct Solver (esbe)');
@@ -198,8 +198,6 @@ model.result.dataset('grid1').set('parmin1', -0.0416);
 model.result.dataset('grid1').set('parmax1', 0.0832);
 model.result.dataset('grid1').set('parmin2', -0.0322);
 model.result.dataset('grid1').set('parmax2', 0.0161);
-
-%% 
 model.result('pg5').label('Graph I want');
 model.result('pg5').set('titletype', 'manual');
 model.result('pg5').set('title', 'Maxwell Stress Tensor and position');
