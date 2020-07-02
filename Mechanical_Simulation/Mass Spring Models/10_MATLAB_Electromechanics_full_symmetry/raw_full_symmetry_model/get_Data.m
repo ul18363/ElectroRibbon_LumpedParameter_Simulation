@@ -22,7 +22,7 @@ plot(pd.d2,'b-')
 figure
 legends={};
 faces=1:10;
-elems{}=
+elems{length(faces)}=[];
 for i = faces
     
     pd = mpheval(model,{'x','y','esbe.unTx','esbe.unTy'},'selection',[i],'edim',[1]);
@@ -37,3 +37,45 @@ end
 legend(legends)
 %%
 pd = mphinterp(model,{'x','y','esbe.unTx','esbe.unTy'},'selection',[10],'edim',[1]);
+
+
+
+
+
+
+%%
+
+pd=mphint2(model,{'x','y','esbe.unTx','esbe.unTy'},'surface','selection',1);
+    
+%%
+model.result().numerical().create('custom1',"Eval")
+%%
+% model.result().numerical('custom1').selection([10]);
+model.result().numerical("custom1").set("expr", {'x', 'y'});
+
+%%
+model.result().numerical("custom1").getData()
+
+%%
+model.result().numerical().create("q2","Global")
+%%
+model.result().numerical("q2").set("expr", 'esbe.Q0_1');
+%%
+model.result().numerical("q2").getData()
+
+
+%%
+model.result().numerical().create('qint',"IntLine");
+% Charge surface density: 'comp1.esbe.nD'
+%%
+model.result().numerical('qint').selection.set([1 2 3 5 7 8]); % 4 and 6 have some problems. Charge density is not defined there
+model.result().numerical("qint").set("expr", 'esbe.nD*esbe.d');
+%%
+
+%model.result().numerical("qint").getData()
+
+model.result().numerical("qint").computeResult();
+q=model.result().numerical("qint").getReal();%Charge
+%model.result().numerical("qint").getImag()
+%%
+q=mphint2(model,{'esbe.nD*esbe.d'},'line','selection',[1 2 3 5 7 8]);
