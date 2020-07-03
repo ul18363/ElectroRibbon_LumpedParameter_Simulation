@@ -20,6 +20,9 @@ classdef BezierEstimator < handle
             interpolated_points=BezierEstimator.BezierInterpCPMatSegVec(param_points(1,:),param_points(2,:),param_points(3,:),param_points(4,:),[1; num_points]);
         end
         
+        function points=interp_by_t(param_points,t)
+            points=BezierEstimator.bezierInterp( param_points(1,:),param_points(2,:),param_points(3,:),param_points(4,:),t);  
+        end
         function plot_visualize_estimation(P,num_points)
             param_points=BezierEstimator.obtain_qubic_bezier_points(P);
             interpolated_points=BezierEstimator.interpolate_qubic_bezier_points(param_points,num_points);

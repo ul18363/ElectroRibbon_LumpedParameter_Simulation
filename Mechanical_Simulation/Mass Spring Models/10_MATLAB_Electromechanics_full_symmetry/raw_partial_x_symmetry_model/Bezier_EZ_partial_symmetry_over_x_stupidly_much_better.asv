@@ -98,12 +98,15 @@ model.component('comp1').selection('sel2').label('top_plate');
 model.view.create('view2', 2);
 
 add_material(model,'comp1','mat3','Transformer oil')
-add_material(model,'comp1','mat2','Steel AISI 4340')
+add_material(model,'comp1','mat2','Transformer oil')
+
+model.component('comp1').material.create('mat2', 'Common');
 
 model.component('comp1').material('mat3').selection.set([]);
 model.component('comp1').material('mat3').selection.allVoids;
 
 model.component('comp1').material('mat2').selection.set([2]);
+model.component('comp1').material('mat2').propertyGroup.create('Enu', 'Young''s modulus and Poisson''s ratio');
 
 model.component('comp1').physics.create('esbe', 'ElectrostaticsBoundaryElements', 'geom1');
 model.component('comp1').physics('esbe').selection.set([]);

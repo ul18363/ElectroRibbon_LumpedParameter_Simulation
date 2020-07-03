@@ -22,26 +22,22 @@ plot(pd.d2,'b-')
 %%
 figure
 legends={};
-%faces=1:23;
-faces=[10 13 21 23];
+faces=1:23;
+faces=1:23;
 
 elems{length(faces)}=[];
-for i = 1:length(faces)
-    face=faces(i);
-    pd = mpheval(model,{'x','y','esbe.unTx','esbe.unTy'},'selection',[face],'edim',1);
+for i = faces
+    
+    pd = mpheval(model,{'x','y','esbe.unTx','esbe.unTy'},'selection',[i],'edim',[1]);
     if isempty(pd.d1)
     continue
     end
     plot(pd.d1,pd.d2,'-x')
-    elems{i}=pd;
-    legends{end+1}=num2str(face);
+    
+    legends{end+1}=num2str(i);
     hold on
 end
 legend(legends)
-
-%%
-
-
 %%
 pd = mphinterp(model,{'x','y','esbe.unTx','esbe.unTy'},'selection',[10],'edim',[1]);
 

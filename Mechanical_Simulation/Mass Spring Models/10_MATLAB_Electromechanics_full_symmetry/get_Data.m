@@ -43,7 +43,7 @@ legend(legends)
 
 
 %%
-pd = mphinterp(model,{'x','y','esbe.unTx','esbe.unTy'},'selection',[10],'edim',[1]);
+pd = mphinterp(model,'x','coord',points','selection',21,'edim',1);%{'x','y','esbe.unTx','esbe.unTy'}
 
 
 
