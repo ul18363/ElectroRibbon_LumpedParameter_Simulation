@@ -1,9 +1,9 @@
 
-clear; clc;
+clear all; clc;
 %profile on
-N=21;
+N=135;%21 135
 obj= Param_Estimator([0.1 0.0127 100e-6],N,'Steel AISI 4340',0.01);
-obj.M=0.06;% M=0 deformation in scale of 10^-5m -> 0.03mm
+obj.M=0.06*0;% M=0 deformation in scale of 10^-5m -> 0.03mm
 % M=0 deformation in scale of 10^-5m -> 0.03mm
 % M=0.06 deformation in scale of 10^-2m -> 17mm
 obj.update_model();
@@ -30,7 +30,7 @@ scale=5.45e-4;ratio=1;% Succesful for N=21;M=0
 %scale=1.55e-4;ratio=1;% Succesful for N=;M=
 
 scale_axial=1;%scale*ratio;
-scale_trans=5.7e-4;%scale/ratio;
+scale_trans=3e-2;%5.7e-4;%scale/ratio;
 obj.plate.k_axial=og_k_axial*scale_axial;
 obj.plate.GA=og_GA*scale_trans;
 %obj.set_elastic_coefficients();

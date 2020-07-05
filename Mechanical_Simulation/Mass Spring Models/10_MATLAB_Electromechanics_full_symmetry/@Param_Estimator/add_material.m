@@ -1,4 +1,4 @@
-function add_material(~,model,comp_tag,mat_tag,mat)
+function add_material(obj,model,comp_tag,mat_tag,mat)
 %model=obj.model;
 %% Create Material
 model.component(comp_tag).material.create(mat_tag, 'Common');

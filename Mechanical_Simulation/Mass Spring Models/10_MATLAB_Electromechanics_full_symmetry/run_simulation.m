@@ -25,6 +25,7 @@ dt_timestep=dt;
 plot_results=false;
 drunk_scale=1.01;
 drunk_scale2=1.01;
+MSE=obj.estimate_error('MSE');
 while T_Sim<T
     % First do a backup
     p_bu=obj.plate.p;
@@ -84,6 +85,12 @@ while T_Sim<T
         disp(['Velocity magnitude :',num2str(sqrt(sum(v_bu.^2,'all')))])
         hold off
         %y_min=min(y_min,obj.plate.p(2,end));
+        %if MSE>obj.estimate_error('MSE')
+        MSE=obj.estimate_error('MSE');
+        %else 
+          %  disp('Error Increased, terminating loop')
+         %   break 
+        %end
         if plot_type==0
             %%
             x_max=0.1;
@@ -92,7 +99,8 @@ while T_Sim<T
             plot(obj.plate.p(1,:),(obj.plate.p(2,:)),'b-o')
             %             title(['model t:',num2str(i) ])
             title(['Profile deflection| Scale:',num2str(scale),...
-                '| M:',num2str(obj.M),'| t:',num2str(last_refresh)])
+                '| M:',num2str(obj.M),'| t:',num2str(last_refresh),...
+                '| MSE:',num2str(obj.estimate_error('MSE'))])
             xlabel('x [m]')
             ylabel('y [m]')
             legend({'Real', 'Simulation'})
@@ -121,3 +129,5 @@ while T_Sim<T
     %dt_timestep
     %obj.perform_timestep(dt_timestep);
 end
+
+%save(['steadyState_N_',num2str(N),'_M_',num2str(obj.M*1000),'.mat'])

@@ -1,8 +1,10 @@
 function model = create_model(obj,edges_coords,width,mass_load,N)
-
+% Creates Model for Mechanical Static Analysis
+%
+%
 import com.comsol.model.*
 import com.comsol.model.util.*
-model = ModelUtil.create('Model');
+model = ModelUtil.create('MSModel');
 
 model.component.create('comp1', true);
 

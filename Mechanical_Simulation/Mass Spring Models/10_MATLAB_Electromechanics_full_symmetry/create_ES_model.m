@@ -1,4 +1,4 @@
-%function out = model
+function out = create_ES_model(points,thickness,clip_l,base_l,gap)
 %
 % Bezier_EZ_partial_symmetry_over_x_stupidly_much_better.m
 %
@@ -7,7 +7,7 @@
 import com.comsol.model.*
 import com.comsol.model.util.*
 
-model = ModelUtil.create('Model');
+model = ModelUtil.create('ES Model');
 
 model.modelPath('/home/bruno/Repositories/Personal/MATLAB_Dissertation/Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/raw_partial_x_symmetry_model');
 
@@ -31,9 +31,9 @@ model.result.evaluationGroup('eg1').create('gev1', 'EvalGlobal');
 model.component('comp1').mesh.create('mesh1');
 
 model.component('comp1').geom('geom1').create('cb1', 'CubicBezier');
-model.component('comp1').geom('geom1').feature('cb1').set('p', {'0' '0.0154' '0.0262' '0.0416'; '0' '-9.3928e-4' '-0.0151' '-0.016'});
+model.component('comp1').geom('geom1').feature('cb1').set('p', b_points);
 model.component('comp1').geom('geom1').create('cb2', 'CubicBezier');
-model.component('comp1').geom('geom1').feature('cb2').set('p', {'0' '0.0154' '0.0262' '0.0416'; '0-thickness' '-9.3928e-4-thickness' '-0.0151-thickness' '-0.016-thickness'});
+model.component('comp1').geom('geom1').feature('cb2').set('p', [b_points(1,:),b_points(2,:)-thickness]);
 model.component('comp1').geom('geom1').create('r2', 'Rectangle');
 model.component('comp1').geom('geom1').feature('r2').set('pos', {'-clip_l' '-thickness'});
 model.component('comp1').geom('geom1').feature('r2').set('type', 'curve');
@@ -98,15 +98,12 @@ model.component('comp1').selection('sel2').label('top_plate');
 model.view.create('view2', 2);
 
 add_material(model,'comp1','mat3','Transformer oil')
-add_material(model,'comp1','mat2','Transformer oil')
-
-model.component('comp1').material.create('mat2', 'Common');
+add_material(model,'comp1','mat2','Steel AISI 4340')
 
 model.component('comp1').material('mat3').selection.set([]);
 model.component('comp1').material('mat3').selection.allVoids;
 
 model.component('comp1').material('mat2').selection.set([2]);
-model.component('comp1').material('mat2').propertyGroup.create('Enu', 'Young''s modulus and Poisson''s ratio');
 
 model.component('comp1').physics.create('esbe', 'ElectrostaticsBoundaryElements', 'geom1');
 model.component('comp1').physics('esbe').selection.set([]);
@@ -246,4 +243,4 @@ model.result('pg5').feature('lngr5').set('autoexpr', true);
 model.result('pg5').feature('lngr5').set('resolution', 'normal');
 model.result.export('plot1').set('filename', '/home/bruno/Repositories/Personal/MATLAB_Dissertation/Mechanical_Simulation/Mass Spring Models/09_MATLAB_GUI/COMSOL files/exports/force_y.txt');
 
-%out = model;
+out = model;

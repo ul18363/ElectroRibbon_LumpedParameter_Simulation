@@ -58,4 +58,8 @@ disp(['99% of the force happens in the first ',num2str(round(100*x_99/max(x),2))
 ylabel('Electrostatic Force [%Total Force]')
 %% Findings
 % 1. Roughly 2.5 mm of the sheet are affected by strong electrostatic forces
+%     Probably a distribution of masses with a distance of 1/3 mm would be
+%     enough. (3 masses per mm)
+% Thus for 45 mm we need 45*3 masses ->N=135
 % 2. Forces in X and Y haveRoughly 2.5 mm of the sheet are affected by strong electrostatic forces
+
