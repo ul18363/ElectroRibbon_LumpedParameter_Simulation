@@ -9,9 +9,19 @@ classdef ES_Estimator < handle
         voltage
         thickness
         model
+        x
+        y
+        unTy
+        unTx
+        dFy
+        dFx
+        da
+        cumFy
+        cumFx
+        numpoints
     end
     methods
-        function obj=ES_Estimator(bezier_points,thickness,sheet_width,clip_l,base_l,gap,voltage)
+        function obj=ES_Estimator(bezier_points,thickness,sheet_width,clip_l,base_l,gap,voltage,numpoints)
             % Constructor
             obj.bezier_points=bezier_points;
             obj.thickness=thickness;
@@ -20,10 +30,11 @@ classdef ES_Estimator < handle
             obj.base_l=base_l;
             obj.gap=gap;
             obj.voltage=voltage;
+            obj.numpoints=numpoints;
             obj.model=obj.create_X_Symmetry_ES_model();
         end
         update_X_Symmetry_model(obj);
-        data=get_x_symmetry_bezier_data(obj,attr,numpoints);
+        data=get_x_symmetry_bezier_data(obj,attr);
         data=get_x_symmetry_plate_data(obj,attr,type);
         
     end

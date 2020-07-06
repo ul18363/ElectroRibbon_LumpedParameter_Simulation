@@ -1,5 +1,6 @@
-function data=get_x_symmetry_bezier_data(obj,attr,numpoints)
+function data=get_x_symmetry_bezier_data(obj,attr)
 model=obj.model;
+numpoints=obj.numpoints;
 sel=17;
 %data=[];
 % if numpoints>1

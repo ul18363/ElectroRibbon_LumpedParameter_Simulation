@@ -85,6 +85,7 @@ classdef Param_Estimator < handle
         analyze_deflections(obj);
         error_est=estimate_error(obj,error_type);
         start_comsol_model(obj);
+        run_solver_static_conditions(obj);
         function update_model(obj)
             obj.model.component('comp1').geom('geom1').feature('pol1').set('table', obj.og_p);
             obj.model.component('comp1').physics('solid').prop('d').set('d', obj.width); %Add Sheet width

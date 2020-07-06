@@ -30,6 +30,6 @@ model.sol('sol1').feature('s1').feature('aDef').set('cachepattern', true);
 % model.sol('sol1').feature('s1').feature('p1').set('plistarr', {'{0,1e-3, 5e-3,10e-3,20e-3,60e-3,200e-3}'});
 % model.sol('sol1').feature('s1').feature('p1').set('punit', {'kg'});
 model.sol('sol1').feature('s1').feature('fc1').set('maxiter', 1024);
-model.sol('sol1').runAll;
+
 
 end

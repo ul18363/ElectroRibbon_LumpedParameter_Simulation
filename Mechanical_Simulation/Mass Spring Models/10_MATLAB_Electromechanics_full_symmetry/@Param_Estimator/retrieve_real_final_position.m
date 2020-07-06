@@ -1,4 +1,5 @@
 function retrieve_real_final_position(obj)
+obj.run_solver_static_conditions(); % Run Solver
 raw_data_tp_unT= obj.model.result().numerical('displacements').getData();
 res=reshape(raw_data_tp_unT,[4,obj.N*2]);
 obj.real_u=res(1,:);

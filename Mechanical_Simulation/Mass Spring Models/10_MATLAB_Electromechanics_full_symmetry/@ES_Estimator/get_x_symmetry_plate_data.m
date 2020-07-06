@@ -7,7 +7,7 @@ switch type
     case 'points'
         data = mpheval(obj.model,attr,'selection',7,'edim',1).d1;
     case 'integral'
-        mphint2(obj.model,{attr},'line','selection',sel)
+        data = mphint2(obj.model,{attr},'line','selection',sel);
 end
 
 end

@@ -8,65 +8,20 @@ h.run_sim_flag=0;
 % N=21;scale=5.45e-4; dt=10^-7; % Succesful for N=21;M=0
 N=11;%scale=1.55e-4; dt=10^-6;% Succesful for N=11;M=0
 M=0.02;
-    function define_new_Param_Estimator(sht_dms,N,M)
-        h.obj=Param_Estimator([0.1 0.0127 100e-6],N,'Steel AISI 4340',0.01);
-        h.obj.M=M;%
-        h.obj.update_model();
-        h.obj.retrieve_real_final_position();
-    end
-define_new_Param_Estimator(N,M)
-
+sht_dms=[0.045 0.0127 100e-6];
+base_l=1e-2;
+define_new_Param_Estimator(sht_dms,N,M,base_l)
 MSE=0;
 t_refresh=10^-2;
 T_Sim=0;
 last_refresh=T_Sim;
-%% SIMULATION
 drunk_scale=1.01;
 %drunk_scale2=1.01;
 dt=1e-6;
 dt_timestep=1e-6;
 Voltage=0;
-    function plot_results()
-        disp(h.obj.plate.k_trans_vec(1))
-        
-        %subplot(3,1,1)
-        axes(h.pax11); %set the current axes to axes2
-        %h.pax11 = pax11;
-        %h.pax21 = pax21;
-        %h.pax31 = pax31;
-        hold off
-        real_p_plot=plot(h.obj.real_x_tp,h.obj.real_y_tp,'r-x')
-        hold on
-        sim_p_plot=plot(h.obj.plate.p(1,:),(h.obj.plate.p(2,:)),'b-o')
-        drawnow
-        title(['K=',num2str(h.obj.plate.k_trans), 'T: ',num2str(T_Sim)]);
-        %['Profile deflection| Scale:',num2str(scale),...
-        %'| M:',num2str(obj.M),'| t:',num2str(i)])
-        xlabel('x [m]')
-        ylabel('y [m]')
-        legend({'Real', 'Simulation'})
-        %subplot(3,1,2)
-        axes(h.pax21); %set the current axes to axes2
-        hold off
-        plot(h.obj.plate.v(2,:))
-        hold on
-        plot(h.obj.plate.v(1,:))
-        xlabel('Node #')
-        ylabel('V [m/s]')
-        legend({'Vy', 'Vx'})
-        axis([0 11 -10e-2 10e-2])
-        %subplot(3,1,3)
-        axes(h.pax31); %set the current axes to axes2
-        semilogy(T_Sim,MSE,'rx')
-        hold on
-        
-        xlabel('Node #')
-        ylabel('MSE')
-        legend({'MSE'})
-        drawnow();
-        
-        
-    end
+contact_ix=1;
+
 %% Create Left Scroller (Voltage Control)
 
 volt_panel=uipanel(h.fgh,'Title','Voltage Control',...
@@ -82,6 +37,7 @@ addlistener(voltage_val_slider, 'Value', 'PostSet',@modify_Voltage_from_slider);
     function modify_Voltage_from_slider(h,~)
         val = get(h,'Value');
         val= round(val,0); %Round Value
+        Voltage=val;
         set(voltage_txt,'String',[num2str(val), 'KV'])
         set(voltage_stat_txt,'String',num2str(val))
         set(voltage_edit,'String',num2str(val))
@@ -92,7 +48,9 @@ addlistener(voltage_val_slider, 'Value', 'PostSet',@modify_Voltage_from_slider);
         value = str2double(get(obj,'String'));
         if ~isnan(value)
             disp(val)
+            Voltage=value;
             set(sld_d_e,'Value',val)
+            set(voltage_txt,'String',[num2str(val), 'KV'])
             set(txh,'String',num2str(val))
         end
     end
@@ -167,23 +125,16 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                 if toc>0.1 % Using drawnow constantly makes loop super slow.
                     tic
                     drawnow;
-                    %update_statistics(0);
-                    
                 end
                 
                 if get(h.stop_btn,'Value')
                     %% Simulation steps goes here
-                    
                     % First do a backup
                     p_bu=h.obj.plate.p;
                     v_bu=h.obj.plate.v;
-                    
-                    
                     dt_timestep_reco=0;
                     tries=0;
-                    %         h.obj.calculate_all_forces();
-                    %         h.obj.perform_timestep(dt);
-                    while dt_timestep_reco~=dt_timestep
+                    while dt_timestep_reco~=dt_timestep %Check for stability
                         h.obj.calculate_all_forces();
                         h.obj.perform_timestep(dt_timestep);
                         dt_timestep_reco=h.obj.plate.analyze_divergence(dt_timestep);
@@ -198,9 +149,36 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                             break
                         end
                         %dt_timestep_reco=obj.plate.analyze_divergence(dt_timestep);
-                        
                     end
-                    T_Sim=T_Sim+dt_timestep;
+                    
+                    if Voltage>0 && h.obj.plate.p(2,contact_ix+1)>=0 %Check for contact
+                        y_old=p_bu(2,contact_ix+1);
+                        if y_old>0 %Previous timestep shouldn't be in contact
+                            error('When checking for contact the previous timestep was already in contact. Stepping Further will cause a negative timestep!')
+                        end
+                        y_n=h.obj.plate.p(2,contact_ix+1);
+                        mini_step=dt_timestep*(-y_old/(y_n-y_old));
+                        h.obj.plate.p=p_bu; %Reset position of particles
+                        h.obj.plate.v=v_bu; %Reset velocities of particles
+                        
+                        h.obj.calculate_all_forces();
+                        h.obj.perform_timestep(mini_step);
+                        
+                        contact_ix=contact_ix+1;
+                        if contact_ix==N-1
+                           break 
+                        end
+                        h.obj.plate.p(2,contact_ix)=0; % The y position of the particle is set to 0.
+                        h.obj.plate.f_mask(2,contact_ix)=0;% No more forces in the y direction can be applied to the particle
+                        %check_for_new_contact()
+                        T_Sim=T_Sim+mini_step;
+                        
+                        %dt_timestep=stable_timestep;
+                    else
+                        T_Sim=T_Sim+dt_timestep;
+                    end
+                    
+                    
                     if T_Sim> last_refresh+t_refresh % If is time to refresh the picture
                         last_refresh=T_Sim;
                         MSE=h.obj.estimate_error('MSE');
@@ -327,7 +305,6 @@ h.base_l_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
         end
         
     end
-
 %% 1.6 Load & Save Button
 h.load_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[13 3.5 2 1],'String','Load','Callback',@load_status);
@@ -345,7 +322,11 @@ h.load_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
         end
         %save([datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'h')
     end
-
+h.quit_btn= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
+    'Position',[13 2.5 2 1],'String','Quit','Callback',@quit_callback);
+    function quit_callback(~,~)
+        close(h.fgh);
+    end
 h.save_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[15 3.5 4 1],'String','Save','Callback',@save_status);
     function save_status(hObject, ~, ~)
@@ -417,5 +398,75 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
 %         h.obj.start_comsol_model();
 %         h.obj.retrieve_real_final_position();
 %     end
+    function define_new_Param_Estimator(sht_dms,N,M,base_l)
+        h.obj=Param_Estimator(sht_dms,N,'Steel AISI 4340',base_l);
+        h.obj.M=M;%
+        h.obj.update_model();
+        h.obj.retrieve_real_final_position();
+    end
+    function plot_results()
+        disp(h.obj.plate.k_trans_vec(1))
+        
+        %subplot(3,1,1)
+        axes(h.pax11); %set the current axes to axes2
+        %h.pax11 = pax11;
+        %h.pax21 = pax21;
+        %h.pax31 = pax31;
+        hold off
+        real_p_plot=plot(h.obj.real_x_tp,h.obj.real_y_tp,'r-x')
+        hold on
+        sim_p_plot=plot(h.obj.plate.p(1,:),(h.obj.plate.p(2,:)),'b-o')
+        drawnow
+        title(['K=',num2str(h.obj.plate.k_trans), 'T: ',num2str(T_Sim)]);
+        %['Profile deflection| Scale:',num2str(scale),...
+        %'| M:',num2str(obj.M),'| t:',num2str(i)])
+        xlabel('x [m]')
+        ylabel('y [m]')
+        legend({'Real', 'Simulation'})
+        %subplot(3,1,2)
+        axes(h.pax21); %set the current axes to axes2
+        hold off
+        plot(h.obj.plate.v(2,:))
+        hold on
+        plot(h.obj.plate.v(1,:))
+        xlabel('Node #')
+        ylabel('V [m/s]')
+        legend({'Vy', 'Vx'})
+        axis([0 11 -10e-2 10e-2])
+        %subplot(3,1,3)
+        axes(h.pax31); %set the current axes to axes2
+        semilogy(T_Sim,MSE,'rx')
+        hold on
+        
+        xlabel('Node #')
+        ylabel('MSE')
+        legend({'MSE'})
+        drawnow();
+        
+        
+    end
+    function dt=check_for_new_contact()
+        
+        h.obj.plate.p(2,contact_ix+1)>=0
+        dt=0;
+        if Voltage>0 %Only matters if electrostatics are active
+            new_contact=min(find(h.obj.plate.p(2,:)>0));
+            if new_contact>contact_ix
+                % New contact point
+                
+                
+                
+            end
+        end
+    end
+
+    function update_ES_Estimator()
+        
+    end
+
+    function estimate_electrical_forces()
+        %% We assume that the model already exists
+        
+    end
 
 end
