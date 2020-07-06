@@ -51,7 +51,7 @@ classdef Param_Estimator < handle
             obj.base_width=base_width;
             obj.M=0;%load mass
             obj.g=[0;-9.81];
-            sht_dms(1)=(sht_dms(1)-base_width)/2;
+            %sht_dms(1)=(sht_dms(1)-base_width)/2;
             obj.L=sht_dms(1);
             obj.width=sht_dms(2);
             obj.thickness=sht_dms(3);
@@ -59,15 +59,7 @@ classdef Param_Estimator < handle
             obj.plate=SheetModel(sht_dms,N,0,0,material);
             obj.plate.define_force_bc('l_fix');% Left edge is fix
             obj.plate.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
-            %% Connect to COMSOL
-            try
-                mphstart
-            catch exception_caught
-                msgText=getReport(exception_caught);
-                if ~contains(msgText,'Already connected to a server')
-                    error('Unexpected when trying to connect to COMSOL server')
-                end
-            end
+
             
             dl=obj.L/(N-1);
             x_side=0:dl:obj.L;
@@ -76,8 +68,10 @@ classdef Param_Estimator < handle
             x=[x_side, flip(x_side)];
             y=[ones(1,N)*obj.thickness,zeros(1,N)];
             obj.og_p=[x' y'];
-            obj.model=obj.create_model(obj.og_p,obj.width,obj.M,obj.N);
+            obj.start_comsol_model()
+            %obj.model=obj.create_model(obj.og_p,obj.width,obj.M,obj.N);
         end
+        
         create_comsol_plot(obj,model);
         show_comsol_plot(obj);
         function set_damping_factor(obj,damping_factor)
@@ -90,6 +84,7 @@ classdef Param_Estimator < handle
         set_elastic_coefficients(obj);
         analyze_deflections(obj);
         error_est=estimate_error(obj,error_type);
+        start_comsol_model(obj);
         function update_model(obj)
             obj.model.component('comp1').geom('geom1').feature('pol1').set('table', obj.og_p);
             obj.model.component('comp1').physics('solid').prop('d').set('d', obj.width); %Add Sheet width

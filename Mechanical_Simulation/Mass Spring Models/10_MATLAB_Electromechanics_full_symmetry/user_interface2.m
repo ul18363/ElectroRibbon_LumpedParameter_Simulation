@@ -8,7 +8,7 @@ h.run_sim_flag=0;
 % N=21;scale=5.45e-4; dt=10^-7; % Succesful for N=21;M=0
 N=11;%scale=1.55e-4; dt=10^-6;% Succesful for N=11;M=0
 M=0.02;
-    function define_new_Param_Estimator(N,M)
+    function define_new_Param_Estimator(sht_dms,N,M)
         h.obj=Param_Estimator([0.1 0.0127 100e-6],N,'Steel AISI 4340',0.01);
         h.obj.M=M;%
         h.obj.update_model();
@@ -20,7 +20,6 @@ MSE=0;
 t_refresh=10^-2;
 T_Sim=0;
 last_refresh=T_Sim;
-
 %% SIMULATION
 drunk_scale=1.01;
 %drunk_scale2=1.01;
@@ -36,9 +35,9 @@ Voltage=0;
         %h.pax21 = pax21;
         %h.pax31 = pax31;
         hold off
-        plot(h.obj.real_x_tp,h.obj.real_y_tp,'r-x')
+        real_p_plot=plot(h.obj.real_x_tp,h.obj.real_y_tp,'r-x')
         hold on
-        plot(h.obj.plate.p(1,:),(h.obj.plate.p(2,:)),'b-o')
+        sim_p_plot=plot(h.obj.plate.p(1,:),(h.obj.plate.p(2,:)),'b-o')
         drawnow
         title(['K=',num2str(h.obj.plate.k_trans), 'T: ',num2str(T_Sim)]);
         %['Profile deflection| Scale:',num2str(scale),...
@@ -68,7 +67,6 @@ Voltage=0;
         
         
     end
-
 %% Create Left Scroller (Voltage Control)
 
 volt_panel=uipanel(h.fgh,'Title','Voltage Control',...
@@ -98,8 +96,6 @@ addlistener(voltage_val_slider, 'Value', 'PostSet',@modify_Voltage_from_slider);
             set(txh,'String',num2str(val))
         end
     end
-
-
 %% Create Right Scroller (Shear Coefficient)
 sh_panel=uipanel(h.fgh,'Title','Shear Control',...
     'Units','centimeters' ,'Position',[5 0 5 25]);
@@ -148,10 +144,11 @@ addlistener(shear_val_slider, 'Value', 'PostSet',@modify_Shear_coefficient_from_
             set(sh_txh,'String',exp_notation(val,exp))
         end
     end
-%% Create Simulation Control Panel
+%% 1.0 Create Simulation Control Panel
+
 sc_panel=uipanel(h.fgh,'Title','Simulation Control',...
     'Units','centimeters' ,'Position',[10 0 20 6]);
-% Simulation Button
+%% 1.1 Simulation Button
 h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[15 1.5 4 1],'String','Resume/Stop',...
     'Callback',@sim_btn_callback);%,...%'Callback',@sh_updateSlider);
@@ -227,42 +224,20 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%% ~~~         SIMULATION   END       ~~~ %%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%% 1.2 Refresh Parameters Buttons (Unused)
 h.refresh_params_btn= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[15 2.5 4 1],'String','Update Params');
-
-
-h.save_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
-    'Position',[15 3.5 4 1],'String','Save','Callback',@save_status);
-    function save_status(hObject, ~, ~)
-        obj=h.obj;
-%         p=h.obj.plate.p;
-%         v=h.obj.plate.v;
-%         N=h.obj.N;
-%         M=h.obj.M;
-%         real_p=h.obj.real_p;
-%         h.obj.sht_dms
-        %save('config.mat',obj)
-        save(['config_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'obj')
-    end
-%
+%% 1.2 Plot Selection (Not Done)
 plot_selector = uicontrol(sc_panel,...
     'Style','popupmenu',...
     'units','centimeters',...
     'Position',[15 4.5 4 1],...
     'String',{'Deformation','Velocity','Error','Force','F.Elastic.','F.Damp.','F.Electr.'},...
-    'Value',1);%,...
-%'ValueChangedFcn',@(dd,event) selection(dd,p));
-
-
-
-%Parameters update buttons
-
-% Editable parameters
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    'Value',1)
+%% 1.3 Refresh Timestep Box
+%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%% Refresh time
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%%%%%%%
 h.refresh_sim_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
     'Position',[10 1 2 1],'String',sprintf('%.2e',t_refresh),...
     'Callback',@refresh_sim_box_callback);
@@ -278,26 +253,31 @@ uicontrol(sc_panel,'style','text','Units','centimeters' ,...
             disp([raw,' needs to be a numeric expression.'])
         end
     end
-
+%% 1.4 Mass & N Edit Box
 h.M_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
-    'Position',[10 2 2 1],'String',sprintf('%.2e',h.obj.plate.M),...
+    'Position',[10 2 2 1],'String',sprintf('%.2e',h.obj.M),...
     'Callback',@M_box_callback);
+
 uicontrol(sc_panel,'style','text','Units','centimeters' ,...
     'Position',[8 1.8 2 1],'String','Mass Load:');
     function M_box_callback(hObject, ~, ~)
         raw=get(hObject,'String');
         [num, status] = str2num(raw);
         if status
-            t_refresh=num;
+            h.obj.M=num;
+            h.obj.update_model();
+            h.obj.retrieve_real_final_position();
         else
             disp([raw,' needs to be a numeric expression.'])
         end
     end
+
 h.N_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
     'Position',[10 3 2 1],'String',num2str(h.obj.plate.N),...
     'Callback',@N_edit_box_callback);
 uicontrol(sc_panel,'style','text','Units','centimeters' ,...
-    'Position',[10 1.8 2 1],'String','N:');
+    'Position',[8 2.8 2 1],'String','N:');
+
     function N_edit_box_callback(obj,~,~)
         [N, status]=str2num(get(obj,'String'));
         if status
@@ -307,38 +287,56 @@ uicontrol(sc_panel,'style','text','Units','centimeters' ,...
             disp([raw,' needs to be a numeric expression.'])
         end
     end
+%% 1.5 Sheet/Base/Clip Dimensions
+h.length_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
+    'Position',[1 3 2 1],'String',sprintf('%.2e',h.obj.sht_dms(1)),...
+    'Callback',@dimension_update_callback,'Tag','length_box');uicontrol(sc_panel,'style','text','Units','centimeters' ,'Position',[1 4 2 0.5],'String','L[m]');
 
+h.widht_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
+    'Position',[3 3 2 1],'String',sprintf('%.2e',h.obj.sht_dms(2)),...
+    'Callback',@dimension_update_callback,'Tag','widht_box');uicontrol(sc_panel,'style','text','Units','centimeters' ,'Position',[3 4 2 0.5],'String','w[m]');
+h.thickness_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
+    'Position',[5 3 2 1],'String',sprintf('%.2e',h.obj.sht_dms(3)),...
+    'Callback',@dimension_update_callback,'Tag','thickness_box');uicontrol(sc_panel,'style','text','Units','centimeters' ,'Position',[5 4 2 0.5],'String','t[m]');
+h.clip_l_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
+    'Position',[1 1 2 1],'String',sprintf('%.2e',1e-2),...
+    'Callback',@dimension_update_callback,'Tag','clip_l_box');uicontrol(sc_panel,'style','text','Units','centimeters' ,'Position',[1 2 2 0.5],'String','clip_l[m]')
+h.base_l_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
+    'Position',[3 1 2 1],'String',sprintf('%.2e',1e-2),...
+    'Callback',@dimension_update_callback,'Tag','base_l_box');uicontrol(sc_panel,'style','text','Units','centimeters' ,'Position',[3 2 2 0.5],'String','base_l[m]')
+    function dimension_update_callback(obj,~)
+        tag=get(obj,'Tag');
+        [value,flag]=str2num(get(obj,'String'));
+        if flag
+        disp(['Updating: ',tag])
+            switch tag 
+                case'length_box'
+                    h.obj.sht_dms(1)=value;
+                case'widht_box'
+                    h.obj.sht_dms(2)=value;
+                case'thickness_box'
+                    h.obj.sht_dms(3)=value;
+                case'clip_l_box'
+                    clip_l=value;
+                case'base_l_box'
+                    base_l=value;    
+            end
+        else
+        disp(['Fail Updating: ',tag])
+        disp('Please pass a numeric value')    
+        end
+        
+    end
 
+%% 1.6 Load & Save Button
 h.load_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
-    'Position',[12 2.8 2 1],'String','Load','Callback',@load_status);
+    'Position',[13 3.5 2 1],'String','Load','Callback',@load_status);
     function load_status(hObject, ~, ~)
-        [file,path] = uigetfile('*.m');
+        [file,path] = uigetfile('*.mat');
         if isequal(file,0)
             disp('User selected Cancel');
         else
             load_obj=load(fullfile(path,file),'obj');
-%             load_M=load(fullfile(path,file),'M');
-%             load_N=load(fullfile(path,file),'N');
-%             load_p=load(fullfile(path,file),'p');
-%             load_v=load(fullfile(path,file),'v');
-%             load_sht_dms=load(fullfile(path,file),'sht_dms');
-%             load_real_p=load(fullfile(path,file),'real_p');
-%             disp(['User selected ', fullfile(path,file)]);
-%             if ~isempty(fieldnames(load_M))
-%                 M=load_M.M;
-%             end
-%             if ~isempty(fieldnames(load_N))
-%                 M=load_M.M;
-%             end
-%             if ~isempty(fieldnames(load_p))
-%                 M=load_M.M;
-%             end
-%             if ~isempty(fieldnames(load_v))
-%                 M=load_M.M;
-%             end
-%             if ~isempty(fieldnames(load_sht_dms))
-%                 M=load_M.M;
-%             end
             if ~isempty(fieldnames(load_obj))
                 h.obj=load_obj.obj;
             end
@@ -348,6 +346,12 @@ h.load_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
         %save([datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'h')
     end
 
+h.save_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
+    'Position',[15 3.5 4 1],'String','Save','Callback',@save_status);
+    function save_status(hObject, ~, ~)
+        obj=h.obj;
+        save(['config_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'obj')
+    end
 %% Create Display Panel
 % disp_panel=uipanel(h.fgh,'Title','Display',...
 %     'Units','centimeters' ,'Position',[10 6 20 20]);
@@ -362,17 +366,43 @@ h.panhandle = panhandle;
 h.pax11 = pax11;
 h.pax21 = pax21;
 h.pax31 = pax31;
+
+    function set_controls_to_obj_values()
+        % Shear Sliders & Edit Box
+        value = h.obj.plate.k_trans;
+        if ~isnan(value)
+            exp=floor(log10(value));
+            val=round(value/10^exp,2);
+            set(shear_exp_slider,'Value',exp)
+            set(shear_val_slider,'Value',val)
+            set(sh_txh,'String',exp_notation(val,exp))
+            set(sh_txh2,'String',exp_notation(val,exp))
+        end
+        %N, M
+        set(N_txt,'String',['N: ',num2str(h.obj.N)])
+        set(M_txt,'String',['M: ',num2str(h.obj.M)])
+        
+        %M=h.obj.M;
+        
+        %update_statistics(0,0)
+        
+        
+        
+        
+    end
 %% Create Statistics Panel
 st_panel=uipanel(h.fgh,'Title','Statistics',...
     'Units','centimeters' ,'Position',[30 0 5 26]);
 
-N_txt           =uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 20.5 3 0.5],'String','Error:');
+M_txt           =uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 21.0 3 0.5],'String','M:');
+N_txt           =uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 20.5 3 0.5],'String','N:');
 error_txt       =uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 20 3 0.5]  ,'String','Error:');
 s_axial_txt     =uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 19.5 3 0.5],'String','K.Ax.:');
 s_trans_txt     =uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 19 3 0.5]  ,'String','K.Tr.:');
 avg_tstep_txt   =uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 18.5 3 0.5],'String','Tstp.:');
 voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Position',[0.5 18 3 0.5]  ,'String','Volt.:');
     function update_statistics(MSE,avg_tstep)
+        set(M_txt,'String',['M: ',num2str(h.obj.M)])
         set(N_txt,'String',['N: ',num2str(h.obj.plate.N)])
         set(voltage_stat_txt,'String',['V: ',num2str(Voltage),' KV'])
         set(error_txt,'String',['Error: ',sprintf('%.2e',MSE)])
@@ -382,6 +412,10 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
     end
 %% Main
 %old_value=get(h.stop_btn,'Value');
-
+%% Misc Functions
+%     function recreate_comsol_model_and_get_real_data()
+%         h.obj.start_comsol_model();
+%         h.obj.retrieve_real_final_position();
+%     end
 
 end
