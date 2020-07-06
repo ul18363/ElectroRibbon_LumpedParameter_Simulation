@@ -1,6 +1,7 @@
 function out = create_X_Symmetry_ES_model(obj)
 %
 b_points=obj.bezier_points;
+x_start=b_points(1,1);
 thickness=obj.thickness;
 sheet_width=obj.sheet_width;
 clip_l=obj.clip_l;
@@ -27,7 +28,7 @@ model.component('comp1').geom('geom1').feature('cb2').set('p', [b_points(1,:) ;b
 model.component('comp1').geom('geom1').create('r2', 'Rectangle');
 model.component('comp1').geom('geom1').feature('r2').set('pos', [-clip_l -thickness]);
 model.component('comp1').geom('geom1').feature('r2').set('type', 'curve');
-model.component('comp1').geom('geom1').feature('r2').set('size', [clip_l thickness]);
+model.component('comp1').geom('geom1').feature('r2').set('size', [clip_l+x_start thickness]);
 model.component('comp1').geom('geom1').create('r3', 'Rectangle');
 model.component('comp1').geom('geom1').feature('r3').set('pos', [x_end  y_end-thickness]);
 model.component('comp1').geom('geom1').feature('r3').set('type', 'curve');

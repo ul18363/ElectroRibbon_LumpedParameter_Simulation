@@ -8,13 +8,14 @@ base_l=obj.base_l;
 gap=obj.gap;
 voltage=obj.voltage;
 
+x_start=b_points(1,1);
 x_end=b_points(1,end);
 y_end=b_points(2,end);
 %% Update Geometry
 model.component('comp1').geom('geom1').feature('cb1').set('p', b_points);
 model.component('comp1').geom('geom1').feature('cb2').set('p', [b_points(1,:) ;b_points(2,:)-thickness]);
 model.component('comp1').geom('geom1').feature('r2').set('pos', [-clip_l -thickness]);
-model.component('comp1').geom('geom1').feature('r2').set('size', [clip_l thickness]);
+model.component('comp1').geom('geom1').feature('r2').set('size', [clip_l+x_start thickness]);
 model.component('comp1').geom('geom1').feature('r3').set('pos', [x_end  y_end-thickness]);
 model.component('comp1').geom('geom1').feature('r3').set('size', [base_l/2 thickness]);
 model.component('comp1').geom('geom1').feature('mir2').set('pos', [x_end+base_l/2 0]);

@@ -8,6 +8,8 @@ forcex=zeros(size(y_sim));
 if any(sign(diff(y_sim))>0)
    error('Y points are not strictly decreasing, force assignement will break.') 
 elseif any(y_sim>obj.y(1)) %Check all the y's are less or equal than 0
+    y=obj.y;y_sim;points;
+    save('error.mat','y','y_sim','points')
    error('A y position in the simulation exceeds top boundary.') 
 end
 [~,ixs]=find(y_sim>=obj.y(end));

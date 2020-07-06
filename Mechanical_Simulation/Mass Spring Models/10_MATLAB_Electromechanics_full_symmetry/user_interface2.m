@@ -5,7 +5,11 @@ h.fgh = figure('Units','normalized','Position',[0 0 1 1]);
 entered=0;
 h.run_sim_flag=0;
 %% 0 Define objects & Initial Values
-% N=21;scale=5.45e-4; dt=10^-7; % Succesful for N=21;M=0
+% N=11;->K_Trans aprox (3.41e3) / Zipping at 2e5V (200KV)
+% N=21;->K_Trans aprox (2.4e4)
+% N=31;->K_Trans aprox (7.7e4)
+% N=61;->K_Trans aprox (5.93e5)
+% N130 ->K_Trans aprox (5.7e6)
 MSE=0;
 t_refresh=10^-2;
 T_Sim=0;
@@ -15,54 +19,86 @@ drunk_scale=1.01;
 dt=1e-6;
 dt_timestep=1e-6;
 Voltage=0;
-contact_ix=1;
+h.contact_ix=1;
+h.video_dir=['videos_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
 %% 0.1 Parameter_Estimator
 N=11;%scale=1.55e-4; dt=10^-6;% Succesful for N=11;M=0
 M=0.02;
 sht_dms=[0.045 0.0127 100e-6];
 base_l=1e-2;
 define_new_Param_Estimator(sht_dms,N,M,base_l)
-
+h.f_el=zeros(size(h.obj.plate.p));
 %% 0.2 ES Estimator
 clip_l=1e-2;
 gap=50e-6;
 numpoints=1000;
 sheet_width=sht_dms(2);
 thickness=sht_dms(3);
-b_points=BezierEstimator.obtain_qubic_bezier_points(h.obj.plate.po');
+b_points=BezierEstimator.obtain_qubic_bezier_points(h.obj.plate.po')';
 define_new_ES_Estimator(b_points,thickness,sheet_width,clip_l,base_l,gap,Voltage,numpoints);
+%% 0.3 Visualization
+filtering_forces=true;
+alpha=0.99;
+f_ele_filt=zeros(size(h.obj.plate.p));
+f_ela_filt=zeros(size(h.obj.plate.p));
+f_damp_filt=zeros(size(h.obj.plate.p));
+f_grav_filt=zeros(size(h.obj.plate.p));
 
 
 %% Create Left Scroller (Voltage Control)
 
 volt_panel=uipanel(h.fgh,'Title','Voltage Control',...
     'Units','centimeters' ,'Position',[0 0 5 25]);
-txh = uicontrol(volt_panel,'Style','text', 'Units','centimeters' ,'Position',[1 1 1.5 1]);
-voltage_val_slider= uicontrol(volt_panel,'Style','slider','Units','centimeters','Position',[1.2 3 1 20],...
-    'Callback',@exp_callback,'Min',0,'Max',12,'SliderStep', [0.01, 0.1]/(12-0));
-voltage_edit = uicontrol(volt_panel,'style','edit','Units','centimeters' ,'Position',[1 2 1.5 1],'Callback',@modify_Voltage_from_edit);
+volt_text_below = uicontrol(volt_panel,'Style','text', 'Units','centimeters' ,'Position',[1 1 1.5 1]);
+voltage_exp_slider= uicontrol(volt_panel,'Style','slider','Units','centimeters','Position',[1.2 3 1 20],...
+    'Min',0,'Max',7,'SliderStep', [1, 1]/(7-0),'Value',1,'Callback',@exp_callback);%,'WindowButtonUpFcn',@voltage_slider_release_callback);
+
+voltage_val_slider= uicontrol(volt_panel,'Style','slider','Units','centimeters','Position',[2.2 3 1 20],...
+    'Min',0,'Max',10,'SliderStep', [0.01, 0.01]/(10-0),'Value',0,'Callback',@val_callback);%,'WindowButtonUpFcn',@voltage_slider_release_callback);
+
+voltage_edit = uicontrol(volt_panel,'style','edit','Units','centimeters' ,'Position',[1 2 1.5 1],...
+    'Callback',@modify_Voltage_from_edit,'String','0');
 voltage_txt = uicontrol(volt_panel,'style','text','Units','centimeters' ,...
-    'Position',[3 2 1.5 1],'Callback',@updateSlider);
+    'Position',[1 1 1.5 1],'String','0KV');
+addlistener(voltage_exp_slider, 'Value', 'PostSet',@modify_Voltage_from_slider);
 addlistener(voltage_val_slider, 'Value', 'PostSet',@modify_Voltage_from_slider);
 
-    function modify_Voltage_from_slider(h,~)
-        val = get(h,'Value');
-        val= round(val,0); %Round Value
-        Voltage=val;
-        set(voltage_txt,'String',[num2str(val), 'KV'])
-        set(voltage_stat_txt,'String',num2str(val))
-        set(voltage_edit,'String',num2str(val))
-        set(h,'Value',val)
+%     function voltage_slider_release_callback(~,~)
+%         disp('Released!')
+%         update_ES_Estimator();
+%     end
+
+
+    function modify_Voltage_from_slider(~,~)
+        val = get(voltage_val_slider,'Value');
+        val=round(val,2);
+%         set(voltage_val_slider,'Value',round(val,2))
+        set(voltage_val_slider,'Value',val)
+        exp = get(voltage_exp_slider,'Value');
+        exp=round(exp,0);
+        set(voltage_exp_slider,'Value',exp)
+        Voltage=val*10^exp;
+        set(voltage_txt,'String',[exp_notation(val,exp), 'V'])
+        set(voltage_stat_txt,'String',['V:',exp_notation(val,exp)])
+        set(voltage_edit,'String',exp_notation(val,exp))
+        %set(voltage_val_slider,'Value',val)
+        
+        %h.obj_es.run_solver();
+        %h.obj_es.x_sym_update_force_distribution();
     end
 
     function modify_Voltage_from_edit(obj,~)
         value = str2double(get(obj,'String'));
         if ~isnan(value)
-            disp(val)
+            %disp(val)
+            exp=floor(log10(value));
+            val=round(value/10^exp,2);
             Voltage=value;
-            set(sld_d_e,'Value',val)
-            set(voltage_txt,'String',[num2str(val), 'KV'])
-            set(txh,'String',num2str(val))
+            set(voltage_exp_slider,'Value',exp)
+            set(voltage_val_slider,'Value',val)
+            set(voltage_txt,'String',[exp_notation(val,exp), 'V'])
+            set(volt_text_below,'String',exp_notation(val,exp))
+            update_ES_Estimator();
         end
     end
 %% Create Right Scroller (Shear Coefficient)
@@ -145,8 +181,14 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                     v_bu=h.obj.plate.v;
                     dt_timestep_reco=0;
                     tries=0;
+                    %Electrical Force estimation
+                    if Voltage>0 && ~isempty(h.obj_es.y)
+                       h.f_el=estimate_electrical_forces(); 
+                    else
+                       h.f_el=zeros(size(h.obj.plate.p));
+                    end
                     while dt_timestep_reco~=dt_timestep %Check for stability
-                        h.obj.calculate_all_forces();
+                        h.obj.calculate_all_forces(h.f_el);
                         h.obj.perform_timestep(dt_timestep);
                         dt_timestep_reco=h.obj.plate.analyze_divergence(dt_timestep);
                         if dt_timestep_reco~=dt_timestep %If divergence is detected
@@ -162,25 +204,28 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         %dt_timestep_reco=obj.plate.analyze_divergence(dt_timestep);
                     end
                     
-                    if Voltage>0 && h.obj.plate.p(2,contact_ix+1)>=0 %Check for contact
-                        y_old=p_bu(2,contact_ix+1);
+                    if Voltage>0 && h.obj.plate.p(2,h.contact_ix+1)>=0 %Check for contact
+                        disp(['Contact at point: ',num2str(h.contact_ix)])
+                        y_old=p_bu(2,h.contact_ix+1);
                         if y_old>0 %Previous timestep shouldn't be in contact
                             error('When checking for contact the previous timestep was already in contact. Stepping Further will cause a negative timestep!')
                         end
-                        y_n=h.obj.plate.p(2,contact_ix+1);
+                        y_n=h.obj.plate.p(2,h.contact_ix+1);
                         mini_step=dt_timestep*(-y_old/(y_n-y_old));
                         h.obj.plate.p=p_bu; %Reset position of particles
                         h.obj.plate.v=v_bu; %Reset velocities of particles
                         
-                        h.obj.calculate_all_forces();
+                        h.obj.calculate_all_forces(h.f_el);
                         h.obj.perform_timestep(mini_step);
                         
-                        contact_ix=contact_ix+1;
-                        if contact_ix==N-1
+                        h.contact_ix=h.contact_ix+1;
+                        if h.contact_ix==N-3
                             break
                         end
-                        h.obj.plate.p(2,contact_ix)=0; % The y position of the particle is set to 0.
-                        h.obj.plate.f_mask(2,contact_ix)=0;% No more forces in the y direction can be applied to the particle
+                        h.obj.plate.p(2,h.contact_ix)=0; % The y position of the particle is set to 0.
+                        h.obj.plate.v(2,h.contact_ix)=0; % The y position of the particle is set to 0.
+                        h.obj.plate.f_mask(2,h.contact_ix)=0;% No more forces in the y direction can be applied to the particle
+                        update_ES_Estimator() % Recalculate forces given the new shape
                         %check_for_new_contact()
                         T_Sim=T_Sim+mini_step;
                         
@@ -189,6 +234,21 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         T_Sim=T_Sim+dt_timestep;
                     end
                     
+                    if filtering_forces
+                        alpha=0.1;
+                        if isequal(size(f_ele_filt),size(h.obj.plate.f))
+                            f_ele_filt=f_ele_filt*alpha+h.f_el*(1-alpha);
+                            f_ela_filt=f_ela_filt*alpha+h.obj.plate.f_elastic*(1-alpha);
+                            f_damp_filt=f_damp_filt*alpha+h.obj.plate.f_damping*(1-alpha);
+                            f_grav_filt=f_grav_filt*alpha+h.obj.plate.f_gravity*(1-alpha);
+
+                        else
+                        f_ele_filt=zeros(size(h.obj.plate.f));
+                        f_ela_filt=zeros(size(h.obj.plate.f));
+                        f_damp_filt=zeros(size(h.obj.plate.f));
+                        f_grav_filt=zeros(size(h.obj.plate.f));
+                        end
+                    end
                     
                     if T_Sim> last_refresh+t_refresh % If is time to refresh the picture
                         last_refresh=T_Sim;
@@ -209,7 +269,13 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
             disp("Stop")
         end
     end
-
+%     function simulation_timestep()
+%         f_el=estimate_electrical_forces();
+%         h.obj.plate.f=obj.plate.f+f_el;
+%         
+%         h.obj.calculate_all_forces();
+%         
+%     end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%% ~~~         SIMULATION   END       ~~~ %%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -270,7 +336,7 @@ uicontrol(sc_panel,'style','text','Units','centimeters' ,...
     function N_edit_box_callback(obj,~,~)
         [N, status]=str2num(get(obj,'String'));
         if status
-            define_new_Param_Estimator(N,M)
+            define_new_Param_Estimator(sht_dms,N,M,base_l)
             %h.obj=Param_Estimator([0.1 0.0127 100e-6],N,'Steel AISI 4340',0.01);
         else
             disp([raw,' needs to be a numeric expression.'])
@@ -327,9 +393,23 @@ h.load_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
             load_obj=load(fullfile(path,file),'obj');
             if ~isempty(fieldnames(load_obj))
                 h.obj=load_obj.obj;
+                N=h.obj.N;
+            end
+            load_obj=load(fullfile(path,file),'contact_ix');
+            if ~isempty(fieldnames(load_obj))
+                h.contact_ix=load_obj.contact_ix;
+            else
+                h.contact_ix=1; 
             end
             
-            
+            h.video_dir=['videos_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
+            bezier_points=BezierEstimator.obtain_qubic_bezier_points(h.obj.plate.p(:,h.contact_ix:N)')';
+            %voltage=Voltage;
+            thickness=h.obj.plate.sht_dms(3);
+            sheet_width=h.obj.plate.sht_dms(2);
+            es_clip_l=clip_l+(h.contact_ix-1)*h.obj.plate.dl;
+            %base_l=base_l;
+            define_new_ES_Estimator(bezier_points,thickness,sheet_width,es_clip_l,base_l,gap,Voltage,numpoints)
         end
         %save([datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'h')
     end
@@ -342,7 +422,8 @@ h.save_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[15 3.5 4 1],'String','Save','Callback',@save_status);
     function save_status(hObject, ~, ~)
         obj=h.obj;
-        save(['config_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'obj')
+        contact_ix=h.contact_ix;
+        save(['config_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'obj','contact_ix')
     end
 %% Create Display Panel
 % disp_panel=uipanel(h.fgh,'Title','Display',...
@@ -419,9 +500,9 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
         disp(h.obj.plate.k_trans_vec(1))
         axes(h.pax11); %set the current axes to axes2
         hold off
-        real_p_plot=plot(h.obj.real_x_tp,h.obj.real_y_tp,'r-x')
+        real_p_plot=plot(h.obj.real_x_tp,h.obj.real_y_tp,'r-x');
         hold on
-        sim_p_plot=plot(h.obj.plate.p(1,:),(h.obj.plate.p(2,:)),'b-o')
+        sim_p_plot=plot(h.obj.plate.p(1,:),(h.obj.plate.p(2,:)),'b-o');
         drawnow
         title(['K=',num2str(h.obj.plate.k_trans), 'T: ',num2str(T_Sim)]);
         %['Profile deflection| Scale:',num2str(scale),...
@@ -429,16 +510,28 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
         xlabel('x [m]')
         ylabel('y [m]')
         legend({'Real', 'Simulation'})
-        if ~isempty(h.obj.plate.v)
-            axes(h.obj_es.)
+        %if ~isempty(h.obj_es.x)
+        axes(h.pax21); %set the current axes to axes2
+%          bar([h.f_el(2,h.contact_ix+1:h.contact_ix+2)',...
+%              h.obj.plate.f_elastic(2,h.contact_ix+1:h.contact_ix+2)',...
+%              h.obj.plate.f_damping(2,h.contact_ix+1:h.contact_ix+2)',...
+%              h.obj.plate.f_gravity(2,h.contact_ix+1:h.contact_ix+2)' ])
+        bar([f_ele_filt(2,h.contact_ix+1:h.contact_ix+2)',...
+             f_ela_filt(2,h.contact_ix+1:h.contact_ix+2)',...
+             f_damp_filt(2,h.contact_ix+1:h.contact_ix+2)',...
+             f_grav_filt(2,h.contact_ix+1:h.contact_ix+2)' ])
+
+        legend({'Electric','Elastic_y','Damping_y','Gravity_y'})
+        %hold off
+                ylabel('F_y [N]')
             
-        end
+        %end
         %subplot(3,1,3)
         axes(h.pax31); %set the current axes to axes2
         semilogy(T_Sim,MSE,'rx')
         hold on
         
-        xlabel('Node #')
+        xlabel('T_Sim [s]')
         ylabel('MSE')
         legend({'MSE'})
         drawnow();
@@ -458,6 +551,10 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
                     legend({'Vy', 'Vx'})
                     axis([0 11 -10e-2 10e-2])
                 end
+            case 'F_Electric'
+                plot(h.obj.plate.p(1,:),h.f_el(2,:),'r-x')
+                xlabel('x [m]')
+                ylabel('F_El_y [N]')
         end
     end
     function define_new_ES_Estimator(b_points,thickness,sheet_width,clip_l,base_l,gap,Voltage,numpoints)
@@ -465,13 +562,13 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
     end
 
     function update_ES_Estimator()
-        ixs=contact_ix:N;
-        h.obj_es.bezier_points=BezierEstimator.obtain_qubic_bezier_points(h.obj.plate.p(:,ixs)');
+        ixs=h.contact_ix:N;
+        h.obj_es.bezier_points=BezierEstimator.obtain_qubic_bezier_points(h.obj.plate.p(:,ixs)')';
         h.obj_es.voltage=Voltage;
-        h.obj_es.thickness=obj.plate.sht_dms(3);
-        h.obj_es.sheet_width=obj.plate.sht_dms(2);
-        h.obj.clip_l=clip_l+(contact_ix-1)*h.obj.plate.dl;
-        h.obj.base_l=base_l;
+        h.obj_es.thickness=h.obj.plate.sht_dms(3);
+        h.obj_es.sheet_width=h.obj.plate.sht_dms(2);
+        h.obj_es.clip_l=clip_l;
+        h.obj_es.base_l=base_l;
         h.obj_es.update_X_Symmetry_model(); %Run COMSOL Model
         h.obj_es.x_sym_update_force_distribution();% Extract Data from COMSOL
     end
@@ -479,7 +576,7 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
     function f_el=estimate_electrical_forces()
         %% We assume that the model already exists
         f_el=zeros(size(h.obj.plate.p));
-        ixs=contact_ix:N;
+        ixs=h.contact_ix+1:N; %The particles to be evaluated are ahead of the contact point
         points=h.obj.plate.p(:,ixs);
         [force_y,force_x]=h.obj_es.x_sym_assign_force_to_points(points);
         f_el(:,ixs)=[force_x;force_y];

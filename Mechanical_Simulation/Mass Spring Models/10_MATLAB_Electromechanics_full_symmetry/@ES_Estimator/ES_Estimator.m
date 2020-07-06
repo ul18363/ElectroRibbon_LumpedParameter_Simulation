@@ -37,6 +37,9 @@ classdef ES_Estimator < handle
         data=get_x_symmetry_bezier_data(obj,attr);
         data=get_x_symmetry_plate_data(obj,attr,type);
         run_solver(obj);
+        [forcey,forcex]=x_sym_assign_force_to_points(obj,points);
+        x_sym_update_force_distribution(obj);
+        
     end
     methods(Access=private)
         model = create_X_Symmetry_ES_model(obj);

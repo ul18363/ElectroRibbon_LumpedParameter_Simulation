@@ -4,7 +4,7 @@ numpoints=obj.numpoints;
 sel=17;
 %data=[];
 % if numpoints>1
-   interpolation_points=BezierEstimator.interp_by_t(obj.bezier_points',linspace(0,1,numpoints)); 
+interpolation_points=BezierEstimator.interp_by_t(obj.bezier_points',linspace(0,1,numpoints)); 
 % end
 
 switch attr

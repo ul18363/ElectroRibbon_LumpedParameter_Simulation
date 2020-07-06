@@ -1,4 +1,4 @@
-function calculate_external_forces(obj)
+function add_load_forces(obj)
 % Force of the load
 f_free_tip=obj.plate.f(:,end);
 dm=obj.plate.dm;

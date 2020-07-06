@@ -77,7 +77,7 @@ classdef Param_Estimator < handle
         function set_damping_factor(obj,damping_factor)
             obj.plate.damp_factor=damping_factor; %Damping Factor
         end
-        calculate_all_forces(obj);
+        calculate_all_forces(obj,f_ext);
         perform_timestep(obj,dt);
         calculate_external_forces(obj);
         obtain_static_coefficients(obj);
