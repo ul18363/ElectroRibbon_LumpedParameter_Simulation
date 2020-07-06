@@ -122,7 +122,7 @@ model.sol('sol1').feature('s1').feature('i1').feature('dp1').set('linsolver', 'p
 model.sol('sol1').feature('s1').feature('i2').label('GMRES Iterative Solver (esbe)');
 model.sol('sol1').feature('s1').feature('i2').set('prefuntype', 'right');
 model.sol('sol1').feature('s1').feature('i2').feature('dp1').set('linsolver', 'pardiso');
-model.sol('sol1').runAll;
+
 
 % model.result.dataset('grid1').set('source', 'data');
 % model.result.dataset('grid1').set('parmin1', -0.0416);

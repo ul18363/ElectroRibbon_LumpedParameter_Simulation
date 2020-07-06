@@ -177,7 +177,7 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         
                         contact_ix=contact_ix+1;
                         if contact_ix==N-1
-                            break
+                           break 
                         end
                         h.obj.plate.p(2,contact_ix)=0; % The y position of the particle is set to 0.
                         h.obj.plate.f_mask(2,contact_ix)=0;% No more forces in the y direction can be applied to the particle
@@ -297,8 +297,8 @@ h.base_l_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
         tag=get(obj,'Tag');
         [value,flag]=str2num(get(obj,'String'));
         if flag
-            disp(['Updating: ',tag])
-            switch tag
+        disp(['Updating: ',tag])
+            switch tag 
                 case'length_box'
                     h.obj.sht_dms(1)=value;
                 case'widht_box'
@@ -308,11 +308,11 @@ h.base_l_box= uicontrol(sc_panel,'style','edit','Units','centimeters' ,...
                 case'clip_l_box'
                     clip_l=value;
                 case'base_l_box'
-                    base_l=value;
+                    base_l=value;    
             end
         else
-            disp(['Fail Updating: ',tag])
-            disp('Please pass a numeric value')
+        disp(['Fail Updating: ',tag])
+        disp('Please pass a numeric value')    
         end
         
     end
@@ -328,7 +328,7 @@ h.load_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
             if ~isempty(fieldnames(load_obj))
                 h.obj=load_obj.obj;
             end
-            
+
             
         end
         %save([datestr(now,'yyyy_mm_dd_HH_MM_SS'),'.mat'],'h')
@@ -429,10 +429,17 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
         xlabel('x [m]')
         ylabel('y [m]')
         legend({'Real', 'Simulation'})
-        if ~isempty(h.obj.plate.v)
-            axes(h.obj_es.)
-            
-        end
+%         Plot Velocity          
+%         axes(h.pax21); %set the current axes to axes2
+%         hold off
+%         plot(h.obj.plate.v(2,:))
+%         hold on
+%         plot(h.obj.plate.v(1,:))
+%         
+        xlabel('Node #')
+        ylabel('V [m/s]')
+        legend({'Vy', 'Vx'})
+        axis([0 11 -10e-2 10e-2])
         %subplot(3,1,3)
         axes(h.pax31); %set the current axes to axes2
         semilogy(T_Sim,MSE,'rx')
@@ -447,17 +454,11 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
     function individual_plot(ax,name)
         switch name
             case 'Velocity'
-                if ~isempty(h.obj.plate.v)
-                    axes(ax); %set the current axes to axes2
-                    hold off
-                    plot(h.obj.plate.v(2,:))
-                    hold on
-                    plot(h.obj.plate.v(1,:))
-                    xlabel('Node #')
-                    ylabel('V [m/s]')
-                    legend({'Vy', 'Vx'})
-                    axis([0 11 -10e-2 10e-2])
-                end
+           axes(h.pax21); %set the current axes to axes2
+%         hold off
+%         plot(h.obj.plate.v(2,:))
+%         hold on
+%         plot(h.obj.plate.v(1,:))     
         end
     end
     function define_new_ES_Estimator(b_points,thickness,sheet_width,clip_l,base_l,gap,Voltage,numpoints)
