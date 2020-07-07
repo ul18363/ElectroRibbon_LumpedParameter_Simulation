@@ -20,7 +20,7 @@ dt=1e-6;
 dt_timestep=1e-6;
 Voltage=0;
 h.contact_ix=1;
-h.video_dir=['videos_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
+h.frame=0;
 %% 0.1 Parameter_Estimator
 N=11;%scale=1.55e-4; dt=10^-6;% Succesful for N=11;M=0
 M=0.02;
@@ -45,6 +45,7 @@ f_damp_filt=zeros(size(h.obj.plate.p));
 f_grav_filt=zeros(size(h.obj.plate.p));
 
 
+h.video_dir=['videos_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
 %% Create Left Scroller (Voltage Control)
 
 volt_panel=uipanel(h.fgh,'Title','Voltage Control',...
@@ -256,6 +257,18 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         plot_results()
                         update_statistics(MSE,t_refresh/steps_since_stats_refresh);
                         steps_since_stats_refresh=0;
+                        if get(h.record_btn,'Value')==1
+                            if ~exist(h.video_dir, 'dir')
+                               mkdir(h.video_dir)
+                            end
+                            h.frame=h.frame+1;
+                            fignew = figure('Visible','off'); % Invisible figure
+                            newAxes = copyobj(h.pax11,fignew); % Copy the appropriate axes
+                            set(newAxes,'Position',get(groot,'DefaultAxesPosition')); % The original position is copied too, so adjust it.
+                            set(fignew,'CreateFcn','set(gcbf,''Visible'',''on'')'); % Make it visible upon loading
+                            saveas(fignew,[h.video_dir,'/',num2str(h.frame),'.eps'],'epsc')
+                            delete(fignew);
+                        end
                     end
                     
                 else
@@ -418,6 +431,9 @@ h.quit_btn= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     function quit_callback(~,~)
         close(h.fgh);
     end
+h.record_btn= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
+    'Position',[13 1.5 2 1],'String','Record');
+
 h.save_status= uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[15 3.5 4 1],'String','Save','Callback',@save_status);
     function save_status(hObject, ~, ~)
@@ -503,7 +519,7 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
         real_p_plot=plot(h.obj.real_x_tp,h.obj.real_y_tp,'r-x');
         hold on
         sim_p_plot=plot(h.obj.plate.p(1,:),(h.obj.plate.p(2,:)),'b-o');
-        drawnow
+        
         title(['K=',num2str(h.obj.plate.k_trans), 'T: ',num2str(T_Sim)]);
         %['Profile deflection| Scale:',num2str(scale),...
         %'| M:',num2str(obj.M),'| t:',num2str(i)])
@@ -520,7 +536,6 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
              f_ela_filt(2,h.contact_ix+1:h.contact_ix+2)',...
              f_damp_filt(2,h.contact_ix+1:h.contact_ix+2)',...
              f_grav_filt(2,h.contact_ix+1:h.contact_ix+2)' ])
-
         legend({'Electric','Elastic_y','Damping_y','Gravity_y'})
         %hold off
                 ylabel('F_y [N]')

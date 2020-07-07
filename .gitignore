@@ -24,3 +24,9 @@ Mechanical_Simulation/Mass_Spring/links.xcf
 *.fig
 
 *.eps
+*.jpeg
+Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/eps2xxx.m
+Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/make_video.asv
+Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/make_video.m
+Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/Make a movie/makeMovie.m
+Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/Make a movie/MaximizeFigureWindow.m
