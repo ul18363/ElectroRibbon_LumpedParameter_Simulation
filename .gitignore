@@ -31,3 +31,4 @@ Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetr
 Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/Make a movie/makeMovie.m
 Mechanical_Simulation/Mass Spring Models/10_MATLAB_Electromechanics_full_symmetry/Make a movie/MaximizeFigureWindow.m
 *.pdf
+*.svg
