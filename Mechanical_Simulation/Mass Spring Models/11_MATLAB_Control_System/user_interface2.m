@@ -570,6 +570,11 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
                 plot(h.obj.plate.p(1,:),h.f_el(2,:),'r-x')
                 xlabel('x [m]')
                 ylabel('F_El_y [N]')
+                
+            case 'Force_Balance_t'
+                plot(h.obj.plate.p(1,:),h.f_el(2,:),'r-x')
+                xlabel('x [m]')
+                ylabel('F_El_y [N]')
         end
     end
     function define_new_ES_Estimator(b_points,thickness,sheet_width,clip_l,base_l,gap,Voltage,numpoints)
@@ -598,4 +603,5 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
         
     end
 
+    
 end

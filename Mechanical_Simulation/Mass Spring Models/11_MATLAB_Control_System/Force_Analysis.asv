@@ -1,0 +1,10 @@
+f_g=h.obj.plate.f_gravity;
+f_dir=[ [0;0] h.obj.plate.f_axial_ltr]+[-h.obj.plate.f_axial_ltr, [0;0] ];
+%h.obj.plate.f_axial_ltr
+f_trans_ltr= [[0;0] obj.f_trans_ltr]+[-obj.f_trans_ltr [0;0]];
+
+
+f_trans_rtl= [obj.f_trans_rtl,[0;0]]+[[0;0] -obj.f_trans_ltr [0;0]];
+
+h.obj.plate.f_trans_ltr
+%[ [0;0] h.obj.plate.f_trans_ltr]+     [h.obj.plate.f_trans_rtl, [0;0] ] ;
