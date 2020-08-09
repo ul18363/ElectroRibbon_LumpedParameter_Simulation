@@ -4,7 +4,11 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear; clc;
+% clear; clc;
+function Fy=parallel_sheet_model_ES(x,dy)
+%  Fy=parallel_sheet_model_ES(x,dy)
+
+
 % close all;
 %% input options
 simulateBreakdown = 1;
