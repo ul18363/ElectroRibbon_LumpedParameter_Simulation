@@ -82,10 +82,6 @@ addlistener(voltage_val_slider, 'Value', 'PostSet',@modify_Voltage_from_slider);
         set(voltage_txt,'String',[exp_notation(val,exp), 'V'])
         set(voltage_stat_txt,'String',['V:',exp_notation(val,exp)])
         set(voltage_edit,'String',exp_notation(val,exp))
-        %set(voltage_val_slider,'Value',val)
-        
-        %h.obj_es.run_solver();
-        %h.obj_es.x_sym_update_force_distribution();
     end
 
     function modify_Voltage_from_edit(obj,~)
@@ -176,6 +172,9 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                 end
                 
                 if get(h.stop_btn,'Value')
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    %%%%%%%%%%     Start of Simulation Step      %%%%%%%%%%
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %% Simulation steps goes here
                     % First do a backup
                     p_bu=h.obj.plate.p;
@@ -271,6 +270,9 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         end
                     end
                     
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    %%%%%%%%%%     End of Simulation Step      %%%%%%%%%%
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 else
                     break
                 end

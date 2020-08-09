@@ -1,48 +1,52 @@
 classdef COMSOL_ES_Model < handle
     properties
+        %Parameters for Model
         points
-        clip_l
-        base_l
         sheet_width
-        %bE
-        gap
         voltage
         thickness
         insulator_thickness
+        %Model
         model
-        x
-        y
-        unTy
-        unTx
-        dFy
-        dFx
-        da
+        %Output
+        xs
+        ys
+        ds
+        arc_len
+        Fy
+        Fx
         cumFy
         cumFx
-        numpoints
+        Fy_dist
+        Fx_dist
+    end
+    properties (Access=private)
+%        Fy_dist
+%        Fx_dist
     end
     methods
-        function obj=COMSOL_ES_Model(initial_points,thickness,insulator_thickness,sheet_width,clip_l,base_l,voltage)
+        function obj=COMSOL_ES_Model(initial_points,thickness,insulator_thickness,sheet_width,voltage)
             % Constructor
-            obj.points=initial_points;
+            obj.points=initial_points; %Remember that COMSOL is columnar!
             obj.thickness=thickness;
             obj.sheet_width=sheet_width;
             obj.insulator_thickness=insulator_thickness;
-            obj.clip_l=clip_l;
-            obj.base_l=base_l;
             obj.voltage=voltage;
             obj.model=obj.generate_model();
         end
-        
-        [f_btm_insulator,f_top_insulator,f_top_interface]=get_results(model,initial_points);
-        insulator_force_y=get_insulator_force(obj)
+        insulator_force_y=get_insulator_force(obj);
+        interface_force_y=get_interface_force(obj);
+        calculate_es_force(obj,points);
+        update_model(obj);
     end
     methods(Access=private)
+        calculate_distributed_force(obj,points);
         model = generate_model(obj);
         generate_selections(~,model)
         generate_mesh(~,model);
         generate_geometry(~,model,input_points,ins_thickness,thickness)
         generate_phyisics(~,model,initial_V,width)
         add_material(~,model,comp_tag,mat_tag,mat);
+        update_model_private(obj,model)
     end
 end

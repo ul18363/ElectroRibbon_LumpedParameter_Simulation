@@ -42,6 +42,7 @@ classdef BezierEstimator < handle
         end
     end
     methods(Static=true,Access=public)%private
+        [Cb,t] = bezier_variable_scope_interp(b_points,precision_range)
         [p0mat,p1mat,p2mat,p3mat,fbi,MxSqD]=bzapproxu(Mat,varargin);
         ans=isvec(x);
         vout=getcolvector(vin);

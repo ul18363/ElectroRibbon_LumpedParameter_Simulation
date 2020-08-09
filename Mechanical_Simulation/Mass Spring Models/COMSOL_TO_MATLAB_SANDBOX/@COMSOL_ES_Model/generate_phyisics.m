@@ -1,4 +1,6 @@
-function generate_phyisics(~,model,initial_V,width)
+function generate_phyisics(obj,model)
+initial_V=obj.voltage;
+width=obj.sheet_width;
 
 model.component('comp1').physics.create('es', 'Electrostatics', 'geom1');
 

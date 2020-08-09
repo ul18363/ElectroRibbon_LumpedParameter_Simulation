@@ -23,28 +23,23 @@ classdef ES_Estimator < handle
         numpoints
     end
     methods
-        function obj=ES_Estimator(bezier_points,thickness,sheet_width,clip_l,base_l,gap,voltage,numpoints)
+        function obj=ES_Estimator(initial_points,thickness,insulator_thickness,sheet_width,clip_l,base_l,voltage,numpoints)
             % Constructor
             obj.bezier_points=bezier_points;
             obj.thickness=thickness;
             obj.sheet_width=sheet_width;
             obj.clip_l=clip_l;
             obj.base_l=base_l;
-            obj.gap=gap;
             obj.voltage=voltage;
             obj.numpoints=numpoints;
-
+            obj.comsol_model=COMSOL_ES_Model(initial_points,thickness,insulator_thickness,sheet_width,clip_l,base_l,voltage);
+            
+            % Initialize parallel plate model
+            eMed = 2.75; eAir = 1; eIns = 4.62; 
+            tIns = 130e-6; EMaxMed = 20e6; EMaxAir = 3e6; dropVolume = 10;
+            obj.numerical_model=Parallel_Plates_ES_Model(eMed,eAir,eIns,tIns,EMaxMed,EMaxAir,dropVolume);
         end
-        update_X_Symmetry_model(obj);
-        data=get_x_symmetry_bezier_data(obj,attr);
-        data=get_x_symmetry_plate_data(obj,attr,type);
-        run_solver(obj);
-        [forcey,forcex]=x_sym_assign_force_to_points(obj,points);
-        x_sym_update_force_distribution(obj);
         
-    end
-    methods(Access=private)
-        model = create_X_Symmetry_ES_model(obj);
-        add_material(~,model,comp_tag,mat_tag,mat);
+        [forcey,forcex]=assign_distribute_forces_to_particles(obj,points,source)
     end
 end

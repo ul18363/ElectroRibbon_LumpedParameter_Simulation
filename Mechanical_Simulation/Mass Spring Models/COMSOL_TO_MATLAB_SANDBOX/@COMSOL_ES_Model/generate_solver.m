@@ -14,5 +14,5 @@ model.sol('sol1').feature('s1').create('fc1', 'FullyCoupled');
 model.sol('sol1').feature('s1').feature.remove('fcDef');
 
 model.sol('sol1').attach('std2');
-% model.sol('sol1').runAll;
+model.sol('sol1').runAll;
 end

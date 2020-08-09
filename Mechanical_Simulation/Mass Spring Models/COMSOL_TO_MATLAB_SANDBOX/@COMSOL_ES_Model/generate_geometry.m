@@ -1,15 +1,17 @@
-function generate_geometry(~,model,input_points,ins_thickness,thickness)
+function generate_geometry(obj,model)
 % generate_geometry(model,input_points,ins_thickness,thickness)
 % Inputs:
 % -model
-% -input_points: Vector of size [N,2] where each row describes the x and y
+% -points: Vector of size [N,2] where each row describes the x and y
 % position of the curve defined by the left half interface between the 
 % insulator and the electrode of the bottom sheet
 % -ins_thickness: Insulator thickness in m
 % -thickness: Electrode thickness in m
 
-
-mid_point_base_x=input_points(end,1);
+points=obj.points;
+thickness=obj.thickness;
+ins_thickness=obj.insulator_thickness;
+mid_point_base_x=points(end,1);
 
 % contact_start_x=input_points(1,1);
 % contact_end_x=input_points(2,1);
@@ -20,7 +22,7 @@ model.component('comp1').geom.create('geom1', 2);
 model.component('comp1').geom('geom1').create('pol1', 'Polygon');
 model.component('comp1').geom('geom1').feature('pol1').set('type', 'open');
 model.component('comp1').geom('geom1').feature('pol1').set('source', 'table');
-model.component('comp1').geom('geom1').feature('pol1').set('table', input_points);
+model.component('comp1').geom('geom1').feature('pol1').set('table', points);
 model.component('comp1').geom('geom1').create('copy3', 'Copy');
 model.component('comp1').geom('geom1').feature('copy3').set('disply', -thickness);
 model.component('comp1').geom('geom1').feature('copy3').selection('input').set({'pol1'});
