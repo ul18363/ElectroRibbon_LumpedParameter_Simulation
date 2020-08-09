@@ -1,4 +1,5 @@
-function generate_selections(model)
+% function generate_selections(model)
+function generate_selections(~,model)
 % generate_selections(model)
 % Domains:
 % 1 - Exterior Oil

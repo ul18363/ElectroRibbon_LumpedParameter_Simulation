@@ -1,5 +1,4 @@
-function add_material(~,model,comp_tag,mat_tag,mat)
-% function add_material(model,comp_tag,mat_tag,mat)
+function add_material(model,comp_tag,mat_tag,mat)
 %model=obj.model;
 %% Create Material
 model.component(comp_tag).material.create(mat_tag, 'Common');
@@ -123,54 +122,37 @@ switch mat
         model.component(comp_tag).material(mat_tag).propertyGroup('Enu').descr('poissonsratio_symmetry', '');
     
     case 'Transformer oil'
-        model.component(comp_tag).material(mat_tag).propertyGroup.create('Enu', 'Young''s modulus and Poisson''s ratio');
-        model.component(comp_tag).material(mat_tag).label('Transformer oil');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func.create('eta', 'Piecewise');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func.create('Cp', 'Piecewise');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func.create('rho', 'Piecewise');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func.create('k', 'Piecewise');
+        model.component('comp1').material('mat3').label('Transformer oil');
+        model.component('comp1').material('mat3').propertyGroup('def').func.create('eta', 'Piecewise');
+        model.component('comp1').material('mat3').propertyGroup('def').func.create('Cp', 'Piecewise');
+        model.component('comp1').material('mat3').propertyGroup('def').func.create('rho', 'Piecewise');
+        model.component('comp1').material('mat3').propertyGroup('def').func.create('k', 'Piecewise');
         
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('eta').set('arg', 'T');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('eta').set('pieces', {'243.0' '273.0' '4492.20229-64.7408879*T^1+0.349900959*T^2-8.40477E-4*T^3+7.57041667E-7*T^4'; '273.0' '373.0' '91.4524999-1.33227058*T^1+0.00777680216*T^2-2.27271368E-5*T^3+3.32419673E-8*T^4-1.94631023E-11*T^5'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('eta').set('argunit', 'K');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('eta').set('fununit', 'Pa*s');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('Cp').set('arg', 'T');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('Cp').set('pieces', {'223.0' '293.0' '-117056.38+1816.76208*T^1-10.305786*T^2+0.0256691919*T^3-2.36742424E-5*T^4'; '293.0' '373.0' '-13408.1491+123.044152*T^1-0.335401786*T^2+3.125E-4*T^3'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('Cp').set('argunit', 'K');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('Cp').set('fununit', 'J/(kg*K)');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('rho').set('arg', 'T');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('rho').set('pieces', {'223.0' '373.0' '1055.04607-0.581753034*T^1-6.40531689E-5*T^2'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('rho').set('argunit', 'K');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('rho').set('fununit', 'kg/m^3');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('k').set('arg', 'T');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('k').set('pieces', {'223.0' '373.0' '0.134299084-8.04973822E-5*T^1'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('k').set('argunit', 'K');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').func('k').set('fununit', 'W/(m*K)');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('dynamicviscosity', 'eta(T)');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('dynamicviscosity_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('heatcapacity', 'Cp(T)');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('heatcapacity_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('density', 'rho(T)');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('density_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('thermalconductivity', {'k(T)' '0' '0' '0' 'k(T)' '0' '0' '0' 'k(T)'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('thermalconductivity_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('relpermittivity', {'2.7' '0' '0' '0' '2.7' '0' '0' '0' '2.7'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('relpermittivity_symmetry', '0');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').addInput('temperature');
-    case 'PVC - Polyvinyl chloride'
-        model.component(comp_tag).material(mat_tag).label('PVC - Polyvinyl chloride');
-        model.component(comp_tag).material(mat_tag).propertyGroup.create('Enu', 'Young''s modulus and Poisson''s ratio');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('thermalexpansioncoefficient', {'100e-6[1/K]' '0' '0' '0' '100e-6[1/K]' '0' '0' '0' '100e-6[1/K]'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('thermalexpansioncoefficient_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('relpermittivity', {'4.6' '0' '0' '0' '4.6' '0' '0' '0' '4.6'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('relpermittivity_symmetry', '0');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('relpermittivity_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('density', '1760[kg/m^3]');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('density_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').set('thermalconductivity', {'0.1[W/(m*K)]' '0' '0' '0' '0.1[W/(m*K)]' '0' '0' '0' '0.1[W/(m*K)]'});
-        model.component(comp_tag).material(mat_tag).propertyGroup('def').descr('thermalconductivity_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('Enu').set('youngsmodulus', '2.9e9[Pa]');
-        model.component(comp_tag).material(mat_tag).propertyGroup('Enu').descr('youngsmodulus_symmetry', '');
-        model.component(comp_tag).material(mat_tag).propertyGroup('Enu').descr('poissonsratio_symmetry', '');
-
+        model.component('comp1').material('mat3').propertyGroup('def').func('eta').set('arg', 'T');
+        model.component('comp1').material('mat3').propertyGroup('def').func('eta').set('pieces', {'243.0' '273.0' '4492.20229-64.7408879*T^1+0.349900959*T^2-8.40477E-4*T^3+7.57041667E-7*T^4'; '273.0' '373.0' '91.4524999-1.33227058*T^1+0.00777680216*T^2-2.27271368E-5*T^3+3.32419673E-8*T^4-1.94631023E-11*T^5'});
+        model.component('comp1').material('mat3').propertyGroup('def').func('eta').set('argunit', 'K');
+        model.component('comp1').material('mat3').propertyGroup('def').func('eta').set('fununit', 'Pa*s');
+        model.component('comp1').material('mat3').propertyGroup('def').func('Cp').set('arg', 'T');
+        model.component('comp1').material('mat3').propertyGroup('def').func('Cp').set('pieces', {'223.0' '293.0' '-117056.38+1816.76208*T^1-10.305786*T^2+0.0256691919*T^3-2.36742424E-5*T^4'; '293.0' '373.0' '-13408.1491+123.044152*T^1-0.335401786*T^2+3.125E-4*T^3'});
+        model.component('comp1').material('mat3').propertyGroup('def').func('Cp').set('argunit', 'K');
+        model.component('comp1').material('mat3').propertyGroup('def').func('Cp').set('fununit', 'J/(kg*K)');
+        model.component('comp1').material('mat3').propertyGroup('def').func('rho').set('arg', 'T');
+        model.component('comp1').material('mat3').propertyGroup('def').func('rho').set('pieces', {'223.0' '373.0' '1055.04607-0.581753034*T^1-6.40531689E-5*T^2'});
+        model.component('comp1').material('mat3').propertyGroup('def').func('rho').set('argunit', 'K');
+        model.component('comp1').material('mat3').propertyGroup('def').func('rho').set('fununit', 'kg/m^3');
+        model.component('comp1').material('mat3').propertyGroup('def').func('k').set('arg', 'T');
+        model.component('comp1').material('mat3').propertyGroup('def').func('k').set('pieces', {'223.0' '373.0' '0.134299084-8.04973822E-5*T^1'});
+        model.component('comp1').material('mat3').propertyGroup('def').func('k').set('argunit', 'K');
+        model.component('comp1').material('mat3').propertyGroup('def').func('k').set('fununit', 'W/(m*K)');
+        model.component('comp1').material('mat3').propertyGroup('def').set('dynamicviscosity', 'eta(T)');
+        model.component('comp1').material('mat3').propertyGroup('def').descr('dynamicviscosity_symmetry', '');
+        model.component('comp1').material('mat3').propertyGroup('def').set('heatcapacity', 'Cp(T)');
+        model.component('comp1').material('mat3').propertyGroup('def').descr('heatcapacity_symmetry', '');
+        model.component('comp1').material('mat3').propertyGroup('def').set('density', 'rho(T)');
+        model.component('comp1').material('mat3').propertyGroup('def').descr('density_symmetry', '');
+        model.component('comp1').material('mat3').propertyGroup('def').set('thermalconductivity', {'k(T)' '0' '0' '0' 'k(T)' '0' '0' '0' 'k(T)'});
+        model.component('comp1').material('mat3').propertyGroup('def').descr('thermalconductivity_symmetry', '');
+        model.component('comp1').material('mat3').propertyGroup('def').set('relpermittivity', {'7' '0' '0' '0' '7' '0' '0' '0' '7'});
+        model.component('comp1').material('mat3').propertyGroup('def').set('relpermittivity_symmetry', '0');
+        model.component('comp1').material('mat3').propertyGroup('def').addInput('temperature');
 end

@@ -33,16 +33,16 @@ classdef COMSOL_ES_Model < handle
             obj.voltage=voltage;
             obj.model=obj.generate_model();
         end
-        update_X_Symmetry_model(obj);
-        data=get_x_symmetry_bezier_data(obj,attr);
-        data=get_x_symmetry_plate_data(obj,attr,type);
-        run_solver(obj);
-        [forcey,forcex]=x_sym_assign_force_to_points(obj,points);
-        x_sym_update_force_distribution(obj);
         
+        [f_btm_insulator,f_top_insulator,f_top_interface]=get_results(model,initial_points);
+        insulator_force_y=get_insulator_force(obj)
     end
     methods(Access=private)
         model = generate_model(obj);
+        generate_selections(~,model)
+        generate_mesh(~,model);
+        generate_geometry(~,model,input_points,ins_thickness,thickness)
+        generate_phyisics(~,model,initial_V,width)
         add_material(~,model,comp_tag,mat_tag,mat);
     end
 end

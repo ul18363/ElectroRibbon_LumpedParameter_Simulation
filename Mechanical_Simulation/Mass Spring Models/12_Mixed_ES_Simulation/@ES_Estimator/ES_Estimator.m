@@ -1,7 +1,5 @@
 classdef ES_Estimator < handle
     properties
-        comsol_model
-        numerical_model
         bezier_points
         clip_l
         base_l
@@ -33,7 +31,7 @@ classdef ES_Estimator < handle
             obj.gap=gap;
             obj.voltage=voltage;
             obj.numpoints=numpoints;
-
+            obj.model=obj.create_X_Symmetry_ES_model();
         end
         update_X_Symmetry_model(obj);
         data=get_x_symmetry_bezier_data(obj,attr);

@@ -1,8 +1,27 @@
-classdef Parallel_Plates_ES_Model < handle
+classdef ES_Estimator < handle
     properties
         bezier_points
+        clip_l
+        base_l
+        sheet_width
+        %bE
+        gap
+        voltage
+        thickness
+        model
+        x
+        y
+        unTy
+        unTx
+        dFy
+        dFx
+        da
+        cumFy
+        cumFx
+        numpoints
+    end
     methods
-        function obj=Parallel_Plates_ES_Model()
+        function obj=ES_Estimator(bezier_points,thickness,sheet_width,clip_l,base_l,gap,voltage,numpoints)
             % Constructor
             obj.bezier_points=bezier_points;
             obj.thickness=thickness;
