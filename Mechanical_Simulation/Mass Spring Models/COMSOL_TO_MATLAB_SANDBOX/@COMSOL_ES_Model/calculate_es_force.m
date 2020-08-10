@@ -1,8 +1,21 @@
 function calculate_es_force(obj,points)
-% 
+% calculate_es_force(obj,points)
+% Given a set of coordinates (points) which belong to the non-zipped left
+% half segment of the bottom sheet it returns for each point the arc-length
+% of such point as well as the cumulative force up to them.
 %
-%
-%
+% Since COMSOL opens the possibility to validate the numerical integration
+% of the force assignement three scaling methods are envisioned:
+%   -'No_scaling': Return the distributed force on the interface as 
+%                  indicated by comsol without checking for overall 
+%                  force in the interface coherence
+%   -'Scale': Return the distributed force scaling to compensate any 
+%             deviation from the overall force during the discretization  
+%   -'Scale_and_add_dielectric': The dielectric suffers a volume force 
+%       which at 6KV adds up to a 10% of the overall force.
+%       The challenge to include this force is to identify this force over
+%       the non-zipped region.
+
 method='No_scaling';
 obj.calculate_distributed_force(points)
 obj.Fy_dist;

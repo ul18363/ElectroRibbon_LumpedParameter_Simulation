@@ -5,7 +5,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % clear; clc;
-function calculate_distributed_force(obj,x,y,V)
+function calculate_distributed_force(obj)
 % Fy=parallel_sheet_model_ES(x,dy)
 % Returns the electrostatic force between two sheets assuming a "parallel 
 % sheet" model. Using the following parameters
@@ -32,17 +32,19 @@ function calculate_distributed_force(obj,x,y,V)
 % dropVolume = 100*1e-6; % m^3 = 1e6 ml
 % V = 10000; % V    
 dropVolume=obj.dropVolume;
-d=obj.d;
-L=obj.L;
+d=obj.sheet_width;
+% L=obj.L;
 eMed=obj.eMed;
 eAir=obj.eAir;
 eIns=obj.eIns;
 tIns=obj.tIns;
 EMaxMed=obj.EMaxMed;
 EMaxAir=obj.EMaxAir;
-discrete_points=obj.discrete_points;
+V=obj.voltage;
+% discrete_points=obj.points;
+x=obj.points(:,1);
+y=obj.points(:,2);
 % y=2*(dy+tIns);
-
 % close all;
 %% input options
 simulateBreakdown = 1;
@@ -51,7 +53,7 @@ simulatePartialBreakdown = 1;
 e0 = 8.85e-12;% e0 vacuum permittivity /F/m
 
 %% interporation
-xs = linspace(x(1),x(end),discrete_points); % Divide homogeneously the range in x
+xs = linspace(x(1),x(end),obj.sample_size); % Divide homogeneously the range in x
 dL = xs(2);
 initialYsMass = interp1(x,y,xs);
 
@@ -80,7 +82,7 @@ if isempty(dropW)
 end    
 %     fprintf('~~~ Length which contains droplet is %2.3f m ~~~\n', dropW);
 for i = 1:length(xs)
-    if xs(i) < dropW || xs(i) > L-dropW
+    if xs(i) < dropW %|| xs(i) > L-dropW (Only Simulating on one half)
         if simulateBreakdown == 0 || abs(2*initialYsMass(i)) > tMinMed
             initialWes(i) = 0.5*(eMed*e0*d*V^2)/(((eMed/eIns)*tIns - 2*initialYsMass(i))^2); % DLZ eq. 1
             % WHY: - initialYsMass(i) because initialYsMass(i) is negative
@@ -98,7 +100,7 @@ end
 Fy_dist=initialWes;
 
 obj.Fy_dist=Fy_dist;
-obj.Fx_dist=zeros(size(Fy));
+obj.Fx_dist=zeros(size(Fy_dist));
 % obj.cumFy=cumsum(Fy);
 % obj.cumFx=cumsum(Fx);
 obj.xs=xs;
