@@ -150,7 +150,7 @@ addlistener(shear_val_slider, 'Value', 'PostSet',@modify_Shear_coefficient_from_
 
 sc_panel=uipanel(h.fgh,'Title','Simulation Control',...
     'Units','centimeters' ,'Position',[10 0 20 6]);
-%% 1.1 Simulation Button
+%% 1.1 Simulation Button (SIMULATION HERE!)
 h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
     'Position',[15 1.5 4 1],'String','Resume/Stop',...
     'Callback',@sim_btn_callback);%,...%'Callback',@sh_updateSlider);
@@ -172,21 +172,24 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                 end
                 
                 if get(h.stop_btn,'Value')
+                    %% Simulation steps goes here
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%     Start of Simulation Step      %%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    %% Simulation steps goes here
-                    % First do a backup
+                    
+                    % 1.1.0 Do a backup
                     p_bu=h.obj.plate.p;
                     v_bu=h.obj.plate.v;
                     dt_timestep_reco=0;
                     tries=0;
-                    %Electrical Force estimation
+                    % 1.1.1 Electrical Force estimation
                     if Voltage>0 && ~isempty(h.obj_es.y)
                        h.f_el=estimate_electrical_forces(); 
                     else
                        h.f_el=zeros(size(h.obj.plate.p));
                     end
+                    
+                    % 1.1.2 TimeStep Resizing + Step with valid timestep
                     while dt_timestep_reco~=dt_timestep %Check for stability
                         h.obj.calculate_all_forces(h.f_el);
                         h.obj.perform_timestep(dt_timestep);
@@ -204,6 +207,7 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         %dt_timestep_reco=obj.plate.analyze_divergence(dt_timestep);
                     end
                     
+                    % 1.1.3 Zipping + ES model update
                     if Voltage>0 && h.obj.plate.p(2,h.contact_ix+1)>=0 %Check for contact
                         disp(['Contact at point: ',num2str(h.contact_ix)])
                         y_old=p_bu(2,h.contact_ix+1);
@@ -234,6 +238,7 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         T_Sim=T_Sim+dt_timestep;
                     end
                     
+                    % 1.1.4 Force filtering for display purposes
                     if filtering_forces
                         alpha=0.1;
                         if isequal(size(f_ele_filt),size(h.obj.plate.f))
@@ -250,6 +255,7 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         end
                     end
                     
+                    % 1.1.5 Refresh Display Block 
                     if T_Sim> last_refresh+t_refresh % If is time to refresh the picture
                         last_refresh=T_Sim;
                         MSE=h.obj.estimate_error('MSE');
@@ -270,9 +276,9 @@ h.stop_btn = uicontrol(sc_panel,'style','toggle','Units','centimeters' ,...
                         end
                     end
                     
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%     End of Simulation Step      %%%%%%%%%%
-                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 else
                     break
                 end
@@ -501,8 +507,6 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
         set(s_trans_txt,'String',['K.Tr.: ',sprintf('%.2e',h.obj.plate.k_trans)])
         set(avg_tstep_txt,'String',['Tstp.: ',sprintf('%.2e',avg_tstep)])
     end
-%% Main
-%old_value=get(h.stop_btn,'Value');
 %% Misc Functions
 %     function recreate_comsol_model_and_get_real_data()
 %         h.obj.start_comsol_model();
@@ -584,7 +588,12 @@ voltage_stat_txt=uicontrol(st_panel,'style','text','Units','centimeters','Positi
     end
 
     function update_ES_Estimator()
-        ixs=h.contact_ix:N;
+        %% 1. Estimate continuous shape by Fitting a Qubic Bezier
+        ixs=h.contact_ix:N; % Free particles (   non in contact)
+        
+        
+        
+        %%
         h.obj_es.bezier_points=BezierEstimator.obtain_qubic_bezier_points(h.obj.plate.p(:,ixs)')';
         h.obj_es.voltage=Voltage;
         h.obj_es.thickness=h.obj.plate.sht_dms(3);

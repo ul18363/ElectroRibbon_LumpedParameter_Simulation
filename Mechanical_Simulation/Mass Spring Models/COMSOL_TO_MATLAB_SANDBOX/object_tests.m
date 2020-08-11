@@ -42,10 +42,15 @@ plot(obj.comsol_model.arc_len,obj.comsol_model.cumFy)
 grid on
 hold on
 plot(obj.numerical_model.arc_len,obj.numerical_model.cumFy)
-
+title('Cumulative Vertial Electrostatic Force N over left half of the bottom sheet at 6KV')
+xlabel('Arc Length [m]')
+ylabel('Cumulative Force [N]')
 %%
 figure()
 plot(obj.comsol_model.arc_len,obj.comsol_model.Fy_dist)
 grid on
 hold on
 plot(obj.numerical_model.arc_len,obj.numerical_model.Fy_dist)
+title('Distributed Vertial Electrostatic Force over left half of the bottom sheet at 6KV')
+xlabel('Arc Length [m]')
+ylabel('Distributed Force [N/m]')
