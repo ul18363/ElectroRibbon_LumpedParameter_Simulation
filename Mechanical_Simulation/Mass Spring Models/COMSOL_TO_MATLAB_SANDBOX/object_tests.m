@@ -9,6 +9,12 @@ voltage=6000;
 curve_points= [initial_points(1,:)+[-clip_l 0];...
                 initial_points;...
                 initial_points(end,:)+[base_l/2 0]];
+curve_points_top=[curve_points(:,1) -curve_points(:,2)];
+%% 
+clear obj
+obj=COMSOL_ES_Model(curve_points,curve_points_top,thickness,insulator_thickness,sheet_width,voltage)
+
+%%
 obj=COMSOL_ES_Model_Flange(curve_points,thickness,insulator_thickness,sheet_width,voltage)
 %%
 obj=ES_Estimator(initial_points,thickness,insulator_thickness,sheet_width,clip_l,base_l,voltage);
