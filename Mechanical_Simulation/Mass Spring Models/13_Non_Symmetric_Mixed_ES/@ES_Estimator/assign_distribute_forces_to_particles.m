@@ -50,10 +50,16 @@ arc_len_sim=[0 ;cumsum(ds_sim)];
 
 switch source
     case 'COMSOL'
-        cumFy=obj.comsol_model.cumFy;
-        cumFx=obj.comsol_model.cumFx;
-        arc_len=obj.comsol_model.arc_len;
-        ys=obj.comsol_model.ys;
+        cumFy=obj.comsol_EZ_model.cumFy;
+        cumFx=obj.comsol_EZ_model.cumFx;
+        arc_len=obj.comsol_EZ_model.arc_len;
+        ys=obj.comsol_EZ_model.ys;
+        
+    case 'COMSOL_Flange'
+        cumFy=obj.comsol_flange_model.cumFy;
+        cumFx=obj.comsol_flange_model.cumFx;
+        arc_len=obj.comsol_flange_model.arc_len;
+        ys=obj.comsol_flange_model.ys;
         
 %         
 %         
@@ -91,7 +97,7 @@ switch distribution_method
         Fx=[Fx(1); diff(Fx)];
         
     case 'Sharp_accumulation_over_y'
-        %If necessar put something to test y monotonicity
+        %If necessary put something to test y monotonicity
         ts=interp1(ys,arc_len,y_sim,'linear','extrap');
         
         Fy=interp1(arc_len,cumFy,ts,'linear','extrap');

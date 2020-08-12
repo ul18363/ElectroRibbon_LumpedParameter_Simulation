@@ -1,8 +1,7 @@
-classdef COMSOL_ES_Model < handle
+classdef COMSOL_ES_Model_Flange < handle
     properties
         %Parameters for Model
-        bottom_points
-        top_points
+        points
         sheet_width
         voltage
         thickness
@@ -26,10 +25,9 @@ classdef COMSOL_ES_Model < handle
 %        Fx_dist
     end
     methods
-        function obj=COMSOL_ES_Model(bottom_points,top_points,thickness,insulator_thickness,sheet_width,voltage)
+        function obj=COMSOL_ES_Model_Flange(initial_points,thickness,insulator_thickness,sheet_width,voltage)
             % Constructor
-            obj.bottom_points=bottom_points; %Remember that COMSOL is columnar!
-            obj.top_points=top_points; %Remember that COMSOL is columnar!
+            obj.points=initial_points; %Remember that COMSOL is columnar!
             obj.thickness=thickness;
             obj.sheet_width=sheet_width;
             obj.insulator_thickness=insulator_thickness;

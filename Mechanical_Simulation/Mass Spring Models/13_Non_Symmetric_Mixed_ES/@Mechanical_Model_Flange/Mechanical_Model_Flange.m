@@ -1,5 +1,5 @@
 
-classdef Mechanical_Model < handle
+classdef Mechanical_Model_Flange < handle
     properties
         sht_dms
         material
@@ -16,7 +16,7 @@ classdef Mechanical_Model < handle
     end
     
     methods
-        function obj=Mechanical_Model(sht_dms,N,material)
+        function obj=Mechanical_Model_Flange(sht_dms,N,material)
             % Mechanical_Model(sht_dms,N,material,base_width)
             %
             % Represents the mechanical model of the Electro-Ribbon actuator

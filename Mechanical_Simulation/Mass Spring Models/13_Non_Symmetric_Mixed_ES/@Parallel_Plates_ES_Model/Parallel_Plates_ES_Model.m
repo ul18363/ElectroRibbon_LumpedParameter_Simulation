@@ -6,12 +6,11 @@ classdef Parallel_Plates_ES_Model < handle
 %         EMaxMed = 20e6; 
 %         EMaxAir = 3e6;
 %         dropVolume = 10;%1e-4;%100*1e-6;
-%         pp_model=Parallel_Plates_ES_Model(eMed,eAir,eIns,tIns,EMaxMed,EMaxAir,dropVolume);
-%         pp_model.
 
     properties
 %         L
         %Parameters for model
+        version
         points
         eMed
         eAir
@@ -37,6 +36,16 @@ classdef Parallel_Plates_ES_Model < handle
     end
     methods
         function obj=Parallel_Plates_ES_Model(points,voltage,eMed,eAir,eIns,tIns,EMaxMed,EMaxAir,dropVolume,sheet_width)
+            % Parallel_Plates_ES_Model
+            % obj=Parallel_Plates_ES_Model(points,voltage,eMed,eAir,eIns,tIns,EMaxMed,EMaxAir,dropVolume,sheet_width)
+            %  
+            % points: matrix where the first column represents the x position between
+            % the sheets and the second column represents the distance
+            % bertween each sheet
+            %
+            
+            obj.version=2.0;
+            
             % Constructor
             obj.voltage=voltage;
             obj.points=points;
@@ -51,8 +60,8 @@ classdef Parallel_Plates_ES_Model < handle
             obj.sample_size=1000;
 %             obj.L=0.1;
         end
-        
-%         [xs,Fy]=get_distributed_force(obj,x,y,V)
+        calculate_es_force(obj)
+
         
     end
     methods(Access=private)
