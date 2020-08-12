@@ -3,7 +3,7 @@ function model=generate_model(obj)
 import com.comsol.model.*
 import com.comsol.model.util.*
 
-model = ModelUtil.create('Model');
+model = ModelUtil.create('ES_Model_Flange');
 model.component.create('comp1', true);
 
 

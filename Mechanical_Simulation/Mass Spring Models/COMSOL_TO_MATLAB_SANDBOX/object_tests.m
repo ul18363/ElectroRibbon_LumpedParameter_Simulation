@@ -17,7 +17,7 @@ obj=COMSOL_ES_Model(curve_points,curve_points_top,thickness,insulator_thickness,
 %%
 obj=COMSOL_ES_Model_Flange(curve_points,thickness,insulator_thickness,sheet_width,voltage)
 %%
-obj=ES_Estimator(initial_points,thickness,insulator_thickness,sheet_width,clip_l,base_l,voltage);
+obj=ES_Estimator(thickness,insulator_thickness,sheet_width,clip_l,base_l,voltage);
 %%
 n=20;
 t=linspace(0,obj.comsol_model.arc_len(end),n);
