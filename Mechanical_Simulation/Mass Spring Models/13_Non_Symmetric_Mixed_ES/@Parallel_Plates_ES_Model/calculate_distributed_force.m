@@ -12,7 +12,7 @@ function calculate_distributed_force(obj)
 % 
 % Backing material:
 % Consider in the configuration of a simply supported beam
-% t = 100e-6;% t height (thickness) of backing material /m
+% h = 100e-6;% h height (thickness) of backing material /m
 % d = 0.0127;% d depth (width) of backing material /m
 % L = 0.1;% L length of backing material /m
 % dL = 1e-4;% dL length of backing material's element /m
@@ -31,7 +31,6 @@ function calculate_distributed_force(obj)
 % Droplet volume and mass options:
 % dropVolume = 100*1e-6; % m^3 = 1e6 ml
 % V = 10000; % V    
-
 dropVolume=obj.dropVolume;
 d=obj.sheet_width;
 % L=obj.L;
@@ -44,7 +43,7 @@ EMaxAir=obj.EMaxAir;
 V=obj.voltage;
 % discrete_points=obj.points;
 x=obj.points(:,1);
-h=obj.points(:,2);
+y=obj.points(:,2);
 % y=2*(dy+tIns);
 % close all;
 %% input options
@@ -56,7 +55,7 @@ e0 = 8.85e-12;% e0 vacuum permittivity /F/m
 %% interporation
 xs = linspace(x(1),x(end),obj.sample_size); % Divide homogeneously the range in x
 dL = xs(2);
-hs = interp1(x,h,xs);
+initialYsMass = interp1(x,y,xs);
 
 %% calculate medium breakdown height for medium and air
 tMinMed = (V/EMaxMed - (eMed*tIns)/eIns);
@@ -68,7 +67,7 @@ tMinAir = (V/EMaxAir - (eAir*tIns)/eIns);
 %% Initial Volume: calculate cumulative volume at each node
 volumes = zeros(1,length(xs));
 for i = 1:length(xs)
-    volumes(i) = -dL*trapz(2.*hs(1:i))*d; % 2.* = top and bottom sides
+    volumes(i) = -dL*trapz(2.*initialYsMass(1:i))*d; % 2.* = top and bottom sides
 end
     
 %% INITIAL: determine loaded simply-supported sheet shape w/ electrostatic force applied
@@ -84,15 +83,15 @@ end
 %     fprintf('~~~ Length which contains droplet is %2.3f m ~~~\n', dropW);
 for i = 1:length(xs)
     if xs(i) < dropW %|| xs(i) > L-dropW (Only Simulating on one half)
-        if simulateBreakdown == 0 || abs(hs(i)) > tMinMed
-            initialWes(i) = 0.5*(eMed*e0*d*V^2)/(((eMed/eIns)*tIns - hs(i))^2); % DLZ eq. 1
+        if simulateBreakdown == 0 || abs(2*initialYsMass(i)) > tMinMed
+            initialWes(i) = 0.5*(eMed*e0*d*V^2)/(((eMed/eIns)*tIns - 2*initialYsMass(i))^2); % DLZ eq. 1
             % WHY: - initialYsMass(i) because initialYsMass(i) is negative
         elseif simulatePartialBreakdown == 1
             initialWes(i) = 0.5*eMed*e0*d*EMaxMed^2;
         end
     else
-        if simulateBreakdown == 0 || abs(hs(i)) > tMinAir
-            initialWes(i) = 0.5*(eAir*e0*d*V^2)/(((eAir/eIns)*tIns - hs(i))^2);
+        if simulateBreakdown == 0 || abs(2*initialYsMass(i)) > tMinAir
+            initialWes(i) = 0.5*(eAir*e0*d*V^2)/(((eAir/eIns)*tIns - 2*initialYsMass(i))^2);
         elseif simulatePartialBreakdown == 1
             initialWes(i) = 0.5*eAir*e0*d*EMaxAir^2;
         end
@@ -105,6 +104,6 @@ obj.Fx_dist=zeros(size(Fy_dist));
 % obj.cumFy=cumsum(Fy);
 % obj.cumFx=cumsum(Fx);
 obj.xs=xs;
-obj.ys=hs;
+obj.ys=initialYsMass;
 return 
 
