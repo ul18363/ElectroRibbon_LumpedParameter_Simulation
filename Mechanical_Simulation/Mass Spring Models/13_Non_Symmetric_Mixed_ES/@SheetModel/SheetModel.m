@@ -140,9 +140,15 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         calculate_local_frames(obj);
         reco_dt=analyze_divergence(obj,dt);
         reset_sheet_to_initial_conditions(obj);
-        perform_timestep(obj,dt);
-        define_edges_orientation_bc(obj,x_r0_c,x_rend_c);
         
+        perform_timestep(obj,dt);
+        perform_pseudostatic_timestep(obj,dt);
+        
+        define_edges_orientation_bc(obj,x_r0_c,x_rend_c);
+        calculate_acceleration(obj);
+                
+        do_a_backup(obj);
+        restore_backup(obj);
     end
     
     methods(Access=private)

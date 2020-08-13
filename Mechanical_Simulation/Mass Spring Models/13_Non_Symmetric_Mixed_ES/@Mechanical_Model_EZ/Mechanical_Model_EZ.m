@@ -38,11 +38,16 @@ classdef Mechanical_Model_EZ < handle
         end
 
         calculate_all_forces(obj);
-        perform_timestep(obj,dt);
+        success_flag=perform_timestep(obj,dt);
+        perform_pseudostatic_timestep(obj,dt);
+        reco_dt=analyze_divergence(obj,dt);
         
         set_elastic_coefficients(obj);
         set_shear_elastic_coefficient(obj,coeff);
         set_direct_elastic_coefficient(obj,coeff);
+        
+        do_a_backup(obj);
+        restore_backup(obj);
     end
     
     methods (Access=private)
