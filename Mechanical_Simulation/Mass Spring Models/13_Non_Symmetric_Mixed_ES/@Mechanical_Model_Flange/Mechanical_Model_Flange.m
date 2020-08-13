@@ -40,7 +40,8 @@ classdef Mechanical_Model_Flange < handle
             %Define Bottom plate
             obj.plate=SheetModel(sht_dms,N,0,0,material);
             obj.plate.define_force_bc('l_fix');% Left edge is fix
-            obj.plate.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
+%             obj.plate.define_edges_orientation_bc([1;0],[1;0]); %Left & Right edges have horizontal orientation
+            obj.plate.define_edges_orientation_bc([1;0],[]); %Left edge has horizontal orientation but right one is Free
         end
 
         set_damping_factor(obj,damping_factor)

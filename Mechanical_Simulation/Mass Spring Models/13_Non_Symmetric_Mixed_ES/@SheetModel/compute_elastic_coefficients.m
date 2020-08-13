@@ -16,6 +16,8 @@ switch obj.shear_type
         obj.k_trans_vec=ones(dims)*obj.k_trans;
     case 'inverse_to_length'
         obj.k_trans_vec=(obj.GA)./vecnorm(obj.dp);
+    case 'inverse_to_length_constant'
+        obj.k_trans_vec=ones(dims)*obj.k_trans./vecnorm(obj.dp);
     case 'symbolic'
         obj.k_trans_vec=sym('Kt',dims);
     case 'manual'

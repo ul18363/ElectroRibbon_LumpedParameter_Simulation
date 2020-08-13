@@ -1,49 +1,68 @@
 classdef EZModel < handle
     properties
+        % Underlying Models
+        mechanical_model
+        electrostatic_model
+        
+        % Parameters
         sht_dms
-        material
+        base_l
+        clip_l
+        ins_thickness
         N
-        gap
-        base_width
         M
-        top_plate
-        bottom_plate
-        f_el_top
-        f_el_btm
-        g
-        f_free_tip
+        voltage
     end
     
     methods
-        function obj=EZModel(sht_dms,N,material,base_width,gap)
+        function obj=EZModel(sht_dms,N,base_l,clip_l,ins_thickness,M)
+            % EZModel
+            %
+            % obj=EZModel(sht_dms,N,base_l,clip_l,ins_thickness,M)
+            %
+            % Class that simulates the Electro-Ribbon actuator
+            % electro-mechanical behaviour.
+            %
+            % Inputs:
+            % sht_dms - (sheet dimensions)[m] : The dimensions of the
+            % region within the clipping area as [lenght, width, thickness]            %
+            %
+            % N: The number of masses in the mass-spring model
+            %
+            % base_l: The length in [m] of the platforms in the actuator
+            % where the load is attached (and the length the platform that
+            % fixes the actuator to the ceiling.
+            %
+            % clip_l: The length of the clips used to attach the plates to
+            % each other
+            %
+            % ins_thickness: Thickness of the insulator layer (assumed the
+            % same for each sheet).
+            %
+            % M: Attached load in [kg].
+            
+            
             %% Constructor
             obj.sht_dms=sht_dms;
             obj.N=N;
-            obj.material=material;
-            obj.gap=gap;
-            obj.base_width=base_width;
-            obj.M=0;%load mass
-            obj.g=[0;-9.81];
-            %obj.g=[0;-9.81];
-            %SheetModel(sht_dms,N,x0,y0,material)
-            % We are going to simulate half of the plate and rely on
-            % symmetry
-            sht_dms(1)=(sht_dms(1)-base_width)/2;
-            % Bottom plate
-            obj.bottom_plate=SheetModel(sht_dms,N,0,0,material);
-            obj.bottom_plate.define_force_bc('r_fix_x');%Right edge slides on "y"
-            obj.bottom_plate.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
-            % Top Plate
-            obj.top_plate=SheetModel(sht_dms,N,0,gap,material);
-            obj.top_plate.define_edges_orientation_bc([1;0],[1;0]); %Left edge has horizontal orientation
-            obj.top_plate.define_force_bc('r_fix');%Right edge is fixed
+            obj.base_l=base_l;
+            obj.M=M;%load mass
+            obj.clip_l=clip_l;
+            obj.ins_thickness=ins_thickness;
+            obj.voltage=0;
+            flexible_segment_dimensions=[(sht_dms(1)-base_l)/2 ]
+%             sht_dms(1)=(sht_dms(1)-base_l)/2;
+            obj.mechanical_model=Mechanical_Model_EZ(sht_dms,N,material);
+            obj.electrostatic_model=ES_Estimator(sht_dms(3),...
+                ins_thickness,sht_dms(2),clip_l,base_l,obj.voltage);
             
         end
-        calculate_all_forces(obj);
-        calculate_external_forces(obj);
-        set_damping_factor(obj,damping_factor);
-        estimate_electrical_force(obj);
-        entangle_plates(obj);
+        
+        update_electrostatic_forces(obj);
+        perform_timestep(obj,dt);
+        new_dt=perform_secure_timestep(obj,dt,adaptive_factor);
+
+        
     end
 end
 
