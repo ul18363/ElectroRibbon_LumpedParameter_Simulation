@@ -20,6 +20,7 @@ nBoundaries=model.geom('geom1').getNBoundaries;
 left_edge_index=4;
 %% Find the interior oil domain by catching the biggest remaining one
 nDomains=model.geom('geom1').getNDomains;
+interior_oil_domain=nDomains;
 domain_size=0;
 model.component('comp1').selection.create('test_sel', 'Explicit');
 model.component('comp1').selection('test_sel').geom('geom1', 2, 1, {'exterior'});

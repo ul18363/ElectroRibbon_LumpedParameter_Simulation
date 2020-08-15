@@ -1,15 +1,20 @@
-function entangle_plates(obj,ixs)
-% Modifies the forces such that the acceleration over a set of indexes 
-% is the same for both plates
+function entangle_plates(obj)
+% After contact is made it joins the masses toghether as one.
 
-%         bottom_plate
-%         top_plate
+ixs=1:obj.contact_ix;
 
-f=(obj.top_plate.f(:,ixs)+obj.bottom_plate.f(:,ixs))/2;
-obj.top_plate.f(:,ixs)=f;
-obj.bottom_plate.f(:,ixs)=f; % Both ends have equal force and masses thus equal acc,vel & pos
+obj.top_plate.p(:,ixs)=(obj.top_plate.p(:,ixs)+obj.bottom_plate.p(:,ixs))/2;
+obj.bottom_plate.p(:,ixs)=obj.top_plate.p(:,ixs);
 
-% If by any chance the plates were different we need to equate
-% the accelerations of the ends
-% f_e=f1_ne+f2_ne->f1_e=f_e*m1/(m1+m2);f2_e=f_e*m2/(m1+m2);
+obj.top_plate.v(:,ixs)=(obj.top_plate.v(:,ixs)+obj.bottom_plate.v(:,ixs))/2;
+obj.bottom_plate.v(:,ixs)=obj.top_plate.v(:,ixs);
+
+obj.top_plate.a(:,ixs)=(obj.top_plate.a(:,ixs)+obj.bottom_plate.a(:,ixs))/2;
+obj.bottom_plate.a(:,ixs)=obj.top_plate.a(:,ixs);
+
+obj.top_plate.f(:,ixs)=(obj.top_plate.f(:,ixs)+obj.bottom_plate.f(:,ixs))/2;
+obj.bottom_plate.f(:,ixs)=obj.top_plate.f(:,ixs);
+
+
+
 end

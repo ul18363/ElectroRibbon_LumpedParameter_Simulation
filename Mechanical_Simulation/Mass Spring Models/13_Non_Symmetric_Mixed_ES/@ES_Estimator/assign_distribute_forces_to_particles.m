@@ -105,6 +105,13 @@ switch distribution_method
         Fx=interp1(arc_len,cumFx,ts,'linear','extrap');
         Fx=[Fx(1); diff(Fx)];
         
+    case 'Sharp_accumulation_over_x'
+        %TODO?
+        
+        
+    case 'Sharp_accumulation_over_h'
+        %TODO?
+        
     otherwise
         error('Force distribution method is not valid.') 
     

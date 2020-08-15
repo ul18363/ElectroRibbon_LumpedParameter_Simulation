@@ -54,6 +54,8 @@ classdef BezierEstimator < handle
         [t]=ChordLengthNormND(p);
         [MatGlobalInterp]=BezierInterpCPMatSegVec(p0mat,p1mat,p2mat,p3mat,NVec,varargin);
         Q=bezierInterp(P0,P1,P2,P3,varargin);
+        t = parameter_by_stepsize_and_limits(lims,stepsize);
+        Cb = bezierInterp2(b_points,t);
     end
     
     

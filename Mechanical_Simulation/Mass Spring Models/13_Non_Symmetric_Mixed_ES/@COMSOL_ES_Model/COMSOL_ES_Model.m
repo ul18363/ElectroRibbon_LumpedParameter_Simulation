@@ -50,5 +50,6 @@ classdef COMSOL_ES_Model < handle
         generate_phyisics(~,model,initial_V,width)
         add_material(~,model,comp_tag,mat_tag,mat);
         update_model_private(obj,model)
+        update_geometry_private(obj,model)
     end
 end

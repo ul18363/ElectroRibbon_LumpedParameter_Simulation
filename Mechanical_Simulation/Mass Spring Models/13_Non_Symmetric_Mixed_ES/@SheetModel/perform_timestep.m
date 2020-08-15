@@ -2,9 +2,18 @@ function perform_timestep(obj,dt) %Timestep size is defined outside
 % Update acceleration, velocities and position
 % All the forces over the chain needs to be calculated previous to perform
 % the timestep
+use_previous_values=false;
+if use_previous_values
+obj.p=obj.p+obj.v*dt;
+obj.v=obj.v+obj.a*dt;
+obj.calculate_acceleration();
+else
+    
 obj.calculate_acceleration();
 obj.v=obj.v+obj.a*dt;
 obj.p=obj.p+obj.v*dt;
+    
+end
 % capped_simulation_flag=false;
 % if capped_simulation_flag
 %     max_vel= 0.1; %m/s- T refresh ->10^-2 s

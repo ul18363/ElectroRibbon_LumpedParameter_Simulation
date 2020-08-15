@@ -79,6 +79,9 @@ model.component('comp1').geom('geom1').feature('r4').set('size', [0.3 0.2]);
 model.component('comp1').geom('geom1').create('del3', 'Delete');
 model.component('comp1').geom('geom1').feature('del3').selection('input').init;
 model.component('comp1').geom('geom1').feature('del3').selection('input').set({'copy3' 'copy5' 'copy6' 'copy7' 'ls1' 'mir5' 'pol1' 'pol2'});
+% 
+% model.component('comp1').geom('geom1').feature('fin').label('Form Assembly');
+% model.component('comp1').geom('geom1').feature('fin').set('action', 'assembly');
 
 model.component('comp1').geom('geom1').run;
 end
