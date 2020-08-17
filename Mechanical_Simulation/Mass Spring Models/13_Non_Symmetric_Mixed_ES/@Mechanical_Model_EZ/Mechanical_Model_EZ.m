@@ -44,12 +44,15 @@ classdef Mechanical_Model_EZ < handle
         reco_dt=analyze_divergence(obj,dt);
         [new_contact_flag,contact_dt]=check_for_new_sequential_contact(obj,contact_definition);
         
-        set_elastic_coefficients(obj);
-        set_shear_elastic_coefficient(obj,coeff);
         set_direct_elastic_coefficient(obj,coeff);
+        set_shear_elastic_coefficient(obj,coeff);
+        set_damping_factor(obj,damping_factor);
+        set_internal_damping_factor(obj,internal_damping_factor);
+        set_computation_definitions(obj,direct_force_type,shear_deformation_definition);
         
         do_a_backup(obj);
         restore_backup(obj);
+        halt_velocities(obj);
         
         implement_contact_forces(obj);
         entangle_plates(obj);

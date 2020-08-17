@@ -24,6 +24,7 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         count % Non Existent (Deprecate!)
         damp_factor
         rho
+        internal_damp_factor
         
         dt_st % Timestep size (Obsolete)
         
@@ -32,8 +33,11 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         N
         
         % Model Configuration Option
-        axial_type
-        shear_type
+        axial_type % Determines how the direct elastic coefficient behaves
+        shear_type % Determines how the shear  elastic coefficient behaves
+        
+        direct_force_type            % Defines how the direct force is computated given its coefficient
+        shear_deformation_definition % Defines how the shear  force is computated given its coefficient
         
         % Mass
         m
@@ -61,13 +65,16 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         f_trans_ltr
         f_trans_rtl
         
+        f_internal_damping
+        
+        
         % Constants
         g % [0 ;-9.81] - Gravitational acceleration at Earth surface
         i % Non Existent (Deprecate!)
-        o % [0;0] - shortcut for a 2D zero vector 
+        o % [0;0] - shortcut for a 2D zero vector
         R % Rotation Matrix (used to get perpendicular vectors fast)
         
-        % Elastic Coefficients 
+        % Elastic Coefficients
         k_axial
         k_axial_vec
         k_trans
@@ -126,7 +133,9 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
     methods
         %obj= SheetModel([0.1 0.0127 100e-6],11,0,0,'steel');
         function obj = SheetModel(sht_dms,N,x0,y0) %Generate Default model
-            
+            obj.internal_damp_factor=0;
+            obj.direct_force_type=1; % Defines how the direct force is computated given its coefficient
+            obj.shear_deformation_definition=0; % Defines how the shear force is computated given a  its coefficient
             obj.x0=x0;
             obj.y0=y0;
             obj.material='steel'; %Before a parameter
@@ -135,7 +144,7 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
             obj.dt_st=1e-7;  %Timestep size (1e-7 is stable for a range of configs.)
             obj.generate_config();
         end
-      
+        
         plot_local_frames(obj);
         calculate_local_frames(obj);
         reco_dt=analyze_divergence(obj,dt);
@@ -146,9 +155,10 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         
         define_edges_orientation_bc(obj,x_r0_c,x_rend_c);
         calculate_acceleration(obj);
-                
+        
         do_a_backup(obj);
         restore_backup(obj);
+        scaled_vect= scale_up(~,vect,scale);
     end
     
     methods(Access=private)
@@ -158,7 +168,6 @@ classdef SheetModel < handle % "< handle"  allow you to pass the instance as ref
         generate_discrete_model(obj);
         set_material_properties(obj);
         snap_initial_configuration(obj);
-        scaled_vect= scale_up(~,vect,scale);
     end
 end
 

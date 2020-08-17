@@ -44,6 +44,7 @@ classdef ES_Estimator < handle
         add_comsol_flange_model(obj,initial_points);
         
         remove_comsol_model(obj);
+        refresh_comsol_forces(obj);
         update_comsol_model(obj,bottom_points,top_points);
         [Fy,Fx,arc_len_sim]=assign_distribute_forces_to_particles(obj,points,source)
     end

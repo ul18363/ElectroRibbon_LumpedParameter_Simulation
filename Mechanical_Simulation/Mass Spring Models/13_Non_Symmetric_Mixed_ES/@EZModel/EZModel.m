@@ -63,7 +63,7 @@ classdef EZModel < handle
         end
         
         update_electrostatic_forces(obj);
-        success_flag=perform_timestep(obj,dt);
+        success_flag=perform_timestep(obj,dt,source_of_es);
         calculate_electrostatic_forces(obj,force_source);
         net_f=overall_force(obj,option);
         update_ES_model(obj,source);

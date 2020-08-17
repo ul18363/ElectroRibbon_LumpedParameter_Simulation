@@ -23,12 +23,13 @@ obj.mechanical_model.set_direct_elastic_coefficient(5.6444e+05);
 T=0
 %%
 load('N21_open.mat')
-obj.voltage=6000;
+obj.voltage=10e3;%10e4;
 obj.update_ES_model('COMSOL')
 
 clc;
 % T=0;
 dt=3e-9;%20e-7;
+max_dt=1e-6;
 % refresh_t=1e-5;
 refresh_t=1e-3; %Plot refresh
 dispT=0;
@@ -76,9 +77,15 @@ while T<5
     v=v*alpha+new_v*(1-alpha);
     dt_avg=dt_avg*alpha+dt*(1-alpha);
     ov_force=ov_force*alpha+obj.overall_force('Disregard_drag')*(1-alpha);
+
     if T>=dispT2
+        
         dispT2=T+refresh_t2;
-        disp([num2str(T),':',num2str(dt_avg),'|',num2str(a),'|',num2str(new_a),'|',num2str(v),'|',num2str(new_v),'|',num2str(ov_force)])
+        zip_ix=obj.mechanical_model.contact_ix+1;
+        d=obj.mechanical_model.top_plate.p(2,zip_ix)-obj.mechanical_model.bottom_plate.p(2,zip_ix);
+%         disp([num2str(T),':',num2str(dt_avg),'|',num2str(a),'|',num2str(new_a),'|',num2str(v),'|',num2str(new_v),'|',num2str(ov_force)])
+        disp([num2str(T),':',num2str(d),'|',num2str(ov_force)])
+    
     end
     
     if T>=dispT3
@@ -102,7 +109,7 @@ while T<5
     success_flag=false;
     while~success_flag
         success_flag=obj.perform_timestep(dt);
-        if success_flag
+        if success_flag && max_dt>dt
             dt=dt*drunk_scale;
         else
             dt=dt/drunk_scale;
@@ -120,6 +127,8 @@ while T<5
     T=T+dt;
     %     disp(dt)
     if T>=dispT
+        obj.update_ES_model('COMSOL')
+        
         hold off
         dispT=T+refresh_t;
         plot(obj.mechanical_model.bottom_plate.p(1,:),obj.mechanical_model.bottom_plate.p(2,:),'r-x')
@@ -219,3 +228,51 @@ plot(obj.mechanical_model.bottom_plate.p_bu(1,:),obj.mechanical_model.bottom_pla
 plot(obj.mechanical_model.top_plate.p_bu(1,:),obj.mechanical_model.top_plate.p_bu(2,:),'b.')
 plot(obj.mechanical_model.bottom_plate.p(1,:),obj.mechanical_model.bottom_plate.p(2,:),'r.')
 plot(obj.mechanical_model.top_plate.p(1,:),obj.mechanical_model.top_plate.p(2,:),'b.')
+%% Electrostatic Forces
+clc;
+contact_ix=obj.mechanical_model.contact_ix;
+btm_ps=obj.mechanical_model.bottom_plate.p(:,contact_ix:end);
+top_ps=obj.mechanical_model.top_plate.p;
+ plot(btm_ps(1,:),btm_ps(2,:))
+ points=btm_ps;
+ source='COMSOL';
+%%
+obj.electrostatic_model.assign_distribute_forces_to_particles(points,source)
+%%
+obj2=obj;
+btm_ps=obj2.mechanical_model.bottom_plate.p;
+obj=obj2.electrostatic_model;
+comsol_top_pts=obj.comsol_EZ_model.top_points;
+%%
+clc;
+bottom_points=obj.comsol_EZ_model.bottom_points(2:end-1,:);
+
+top_points=obj.comsol_EZ_model.top_points(2:end-1,:);
+
+bottom_points(:,2)=bottom_points(:,2)-obj.insulator_thickness;
+top_points(:,2)=top_points(:,2)+obj.insulator_thickness;
+
+obj.comsol_EZ_model.calculate_es_force(top_points,'top');
+obj.comsol_EZ_model.calculate_es_force(bottom_points,'bottom');
+%%
+clc; close all;
+
+xs_top=obj.comsol_EZ_model.xs_top;
+ys_top=obj.comsol_EZ_model.ys_top;
+Fy_dist_top=obj.comsol_EZ_model.Fy_dist_top;
+plot(xs_top,Fy_dist_top)
+grid on
+figure()
+xs=obj.comsol_EZ_model.xs;
+Fy_dist=obj.comsol_EZ_model.Fy_dist;
+plot(xs,Fy_dist)
+%%
+
+plot(obj.comsol_EZ_model.xs_top,obj.comsol_EZ_model.cumFx_top)
+% flexible_segment_top_pts_comsol=comsol_top_pts(2:end-1,:);
+hold on
+plot(obj.comsol_EZ_model.xs,obj.comsol_EZ_model.cumFx)
+
+%%
+model=obj.comsol_EZ_model.model
+mphlaunch(model)

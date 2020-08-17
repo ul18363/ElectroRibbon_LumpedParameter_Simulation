@@ -23,9 +23,10 @@ function [Fy,Fx,arc_len_sim]=assign_distribute_forces_to_particles(obj,points,so
 %        distributed to each proportionally to the distance to each point.
 %        (Smoother) - TODO /Disregards effects from curvature mismatchs.
 
+%%
 % distribution_method='Sharp_accumulation_over_arc_length';
-distribution_method='Sharp_accumulation_over_y';
-
+% distribution_method='Sharp_accumulation_over_y';
+distribution_method='Sharp_accumulation_over_y_distance_to_zipping_point';
 % source;
 % We assume that we know the force  
 y_sim=points(:,2);
@@ -47,13 +48,22 @@ arc_len_sim=[0 ;cumsum(ds_sim)];
 %    error('A y position in the simulation exceeds top boundary.') 
 % end
 
-
+%%
 switch source
-    case 'COMSOL'
+    case 'COMSOL_bottom'
+        %%
         cumFy=obj.comsol_EZ_model.cumFy;
         cumFx=obj.comsol_EZ_model.cumFx;
         arc_len=obj.comsol_EZ_model.arc_len;
         ys=obj.comsol_EZ_model.ys;
+    case 'COMSOL_top'
+        %%
+        cumFy=obj.comsol_EZ_model.cumFy_top;
+        cumFx=obj.comsol_EZ_model.cumFx_top;
+        arc_len=obj.comsol_EZ_model.arc_len_top;
+        ys=obj.comsol_EZ_model.ys_top;
+        
+        
         
     case 'COMSOL_Flange'
         cumFy=obj.comsol_flange_model.cumFy;
@@ -61,29 +71,12 @@ switch source
         arc_len=obj.comsol_flange_model.arc_len;
         ys=obj.comsol_flange_model.ys;
         
-%         
-%         
-%         forcey_temp=interp1(obj.y,cumFy,y_sim(ixs));
-%         
-%         
-%         forcey_temp=[forcey_temp(1) diff(forcey_temp)];
-%         forcey(ixs)=forcey_temp;
-%         
-%         
-%         forcex_temp=interp1(obj.y,obj.cumFx,y_sim(ixs));
-%         forcex_temp=[forcex_temp(1) diff(forcex_temp)];
-%         forcex(ixs)=forcex_temp;
     case 'PPM'   
         cumFy=obj.numerical_model.cumFy;
         cumFx=obj.numerical_model.cumFx;
         arc_len=obj.numerical_model.arc_len;
         ys=obj.numerical_model.ys;
-%         forcey_temp=interp1(obj.y,obj.cumFy,y_sim(ixs));
-%         forcey_temp=[forcey_temp(1) diff(forcey_temp)];
-%         forcey(ixs)=forcey_temp;
-%         forcex_temp=interp1(obj.y,obj.cumFx,y_sim(ixs));
-%         forcex_temp=[forcex_temp(1) diff(forcex_temp)];
-%         forcex(ixs)=forcex_temp;
+
     otherwise
         error('When specifying the source of the Electrostatic Force an unrecognized source was specified.') 
 end
@@ -105,6 +98,22 @@ switch distribution_method
         Fx=interp1(arc_len,cumFx,ts,'linear','extrap');
         Fx=[Fx(1); diff(Fx)];
         
+    case 'Sharp_accumulation_over_y_distance_to_zipping_point'
+        %TODO important!
+        % Get Y's zipping points from electrostatic model and current
+        % simulation
+        zipping_point_y_sim=y_sim(1);
+        zipping_point_ys=ys(1);
+        % Offset both to match the zipping points
+        ys=ys-zipping_point_ys;
+        y_sim=y_sim-zipping_point_y_sim;
+        ts=interp1(ys,arc_len,y_sim,'linear','extrap');
+        
+        Fy=interp1(arc_len,cumFy,ts,'linear','extrap');
+        Fy=[Fy(1); diff(Fy)];
+        Fx=interp1(arc_len,cumFx,ts,'linear','extrap');
+        Fx=[Fx(1); diff(Fx)];
+               
     case 'Sharp_accumulation_over_x'
         %TODO?
         

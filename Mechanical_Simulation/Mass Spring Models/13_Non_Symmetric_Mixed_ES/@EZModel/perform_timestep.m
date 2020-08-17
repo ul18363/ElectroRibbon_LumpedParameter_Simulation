@@ -1,4 +1,4 @@
-function success_flag=perform_timestep(obj,dt)
+function success_flag=perform_timestep(obj,dt,source_of_es)
 % Update acceleration, velocities and position
 % All the forces over the chain needs to be calculated previous to perform
 % the timestep
@@ -7,7 +7,14 @@ obj.mechanical_model.calculate_all_forces()
 % 2. Calculate Electrostatic Forces & Communicate them to the mechanical model
 
 %     obj.calculate_electrostatic_forces('Manual_homogeneous_dist_force')
-obj.calculate_electrostatic_forces('Manual_concentrated_zip_force')
+% obj.calculate_electrostatic_forces('Manual_concentrated_zip_force')
+% obj.calculate_electrostatic_forces('COMSOL')
+if obj.voltage>0
+    obj.calculate_electrostatic_forces(source_of_es)
+else
+    obj.mechanical_model.bottom_plate_ext_f=obj.mechanical_model.bottom_plate.p*0;
+    obj.mechanical_model.top_plate_ext_f=obj.mechanical_model.top_plate.p*0;
+end
 if obj.voltage==0
     % This is not strictly correct however is easier than implementing a
     % thorough contact model
@@ -42,12 +49,14 @@ if contact_flag && (obj.voltage>0)
     obj.mechanical_model.entangle_plates();
     
     % 5.4 - Update Electrostatic Model
-    obj.update_ES_model('COMSOL')
-
+    if isequal(source_of_es,'COMSOL')
+        obj.update_ES_model('COMSOL')
+    end
+    %     obj.electrostatic_model.assign_distribute_forces_to_particles(obj.mechanical_model.bottom_plate.p','COMSOL')
     % 5.5 - Perform Timestep with what remains of time original timestep
     remaining_dt=dt-contact_dt;
     % If succeeds keeps returns true, if fails returns false but it has a
-    success_flag=obj.perform_timestep(remaining_dt);
+    success_flag=obj.perform_timestep(remaining_dt,source_of_es);
     
     
 end

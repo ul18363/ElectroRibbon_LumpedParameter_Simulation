@@ -20,8 +20,26 @@ switch force_source
         obj.mechanical_model.top_plate_ext_f=-f; 
         
     case 'COMSOL'
-        obj.mechanical_model.bottom_plate_ext_f=[];
-        obj.mechanical_model.top_plate_ext_f=[];
+        obj.mechanical_model.bottom_plate_ext_f=zeros([2,obj.N]);
+        obj.mechanical_model.top_plate_ext_f=zeros([2,obj.N]);
+        
+        % Obtain contact index
+        contact_ix=obj.mechanical_model.contact_ix;
+        % Points to be evaluated
+        p_btm=obj.mechanical_model.bottom_plate.p(:,contact_ix:end);
+        p_top=obj.mechanical_model.top_plate.p(:,contact_ix:end);
+        % Retrieve forces
+        [Fy,Fx,~]=obj.electrostatic_model.assign_distribute_forces_to_particles(p_btm','COMSOL_bottom');
+        [Fy_top,Fx_top,~]=obj.electrostatic_model.assign_distribute_forces_to_particles(p_top','COMSOL_top');
+        Fy_top=-Fy_top;
+        if any (isnan(Fy)|isnan(Fx)|isnan(Fx_top)|isnan(Fy_top))
+            error('One of the forces returned by COMSOL is not a number')
+            
+        end
+        % Assign forces to mechanical model
+        obj.mechanical_model.top_plate_ext_f(:,contact_ix:end)=[Fy_top, Fx_top]';        
+        obj.mechanical_model.bottom_plate_ext_f(:,contact_ix:end)=[Fy, Fx]';
+
     case 'Parallel Plate Model'
         obj.mechanical_model.bottom_plate_ext_f=[];
         obj.mechanical_model.top_plate_ext_f=[];
