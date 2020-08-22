@@ -23,6 +23,7 @@ classdef COMSOL_ES_Model < handle
         % Output Bottom Sheet
         xs
         ys
+        hs
         ds
         arc_len
         Fy
@@ -36,6 +37,7 @@ classdef COMSOL_ES_Model < handle
         % Output Top Sheet
         xs_top
         ys_top
+        hs_top
         ds_top
         arc_len_top
         Fy_top

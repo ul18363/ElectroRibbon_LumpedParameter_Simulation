@@ -19,7 +19,8 @@ top_points_interface=top_points;
 bottom_points_interface(:,2)=bottom_points_interface(:,2)-obj.insulator_thickness;
 top_points_interface(:,2)=top_points_interface(:,2)+obj.insulator_thickness;
 
-obj.comsol_EZ_model.calculate_es_force(bottom_points_interface,'bottom')
-obj.comsol_EZ_model.calculate_es_force(top_points_interface,'top')
+obj.comsol_EZ_model.calculate_es_force(bottom_points_interface,top_points_interface)
+% obj.comsol_EZ_model.calculate_es_force(bottom_points_interface,'bottom')
+% obj.comsol_EZ_model.calculate_es_force(top_points_interface,'top')
 obj.comsol_EZ_model.do_a_backup();
 end

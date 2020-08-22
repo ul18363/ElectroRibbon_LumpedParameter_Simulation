@@ -7,10 +7,10 @@ if isequal(source,'SKIP')
 end
 %%
 % Obtain contact point
-
- contact_ix=obj.mechanical_model.contact_ix;
- top_p=obj.mechanical_model.top_plate.p(:,contact_ix:end)';
- btm_p=obj.mechanical_model.bottom_plate.p(:,contact_ix:end)';
+%%
+contact_ix=obj.mechanical_model.contact_ix;
+top_p=obj.mechanical_model.top_plate.p(:,contact_ix:end)';
+btm_p=obj.mechanical_model.bottom_plate.p(:,contact_ix:end)';
 % Obtain Bezier points
 top_b_points= BezierEstimator.obtain_qubic_bezier_points(top_p);
 btm_b_points= BezierEstimator.obtain_qubic_bezier_points(btm_p);
@@ -18,14 +18,60 @@ btm_b_points= BezierEstimator.obtain_qubic_bezier_points(btm_p);
 voltage=obj.voltage;
 obj.electrostatic_model.voltage=voltage;
 % Apply tangent angle correction
-apply_angle_corrections=true;
-if apply_angle_corrections
-    top_b_points(2,2)=top_b_points(1,2);% Horizontal orientation of left end
-    top_b_points(3,2)=top_b_points(4,2);% Horizontal orientation of Right end
-    
-    btm_b_points(2,2)=btm_b_points(1,2);% Horizontal orientation of left end
-    btm_b_points(3,2)=btm_b_points(4,2);% Horizontal orientation of Right end
+angle_correction_type='Preserve_Continuity';%4 Options: None/All_Horizontal/Preserve_Continuity/Midway
+switch angle_correction_type
+    case 'None'
+        
+    case'Preserve_Continuity'
+        top_b_points(3,2)=top_b_points(4,2);% Horizontal orientation of Right end
+        btm_b_points(3,2)=btm_b_points(4,2);% Horizontal orientation of Right end
+        if contact_ix==1
+            top_b_points(2,2)=top_b_points(1,2);% Horizontal orientation of left end
+            btm_b_points(2,2)=btm_b_points(1,2);% Horizontal orientation of left end
+        else
+            direction=obj.mechanical_model.top_plate.p(:,contact_ix)'-obj.mechanical_model.top_plate.p(:,contact_ix-1)';
+            direction=normr(direction);
+            
+            dir_top=top_b_points(2,:)-top_b_points(1,:);
+            dir_btm=btm_b_points(2,:)-btm_b_points(1,:);
+            
+            dir_btm=direction*(direction*dir_btm');
+            dir_top=direction*(direction*dir_top');
+            
+            btm_b_points(2,:)=btm_b_points(1,:)+dir_btm;
+            top_b_points(2,:)=top_b_points(1,:)+dir_top;
+            %normr(dir_btm)
+        end
+        
+    case'All_Horizontal'
+        top_b_points(3,2)=top_b_points(4,2);% Horizontal orientation of Right end
+        btm_b_points(3,2)=btm_b_points(4,2);% Horizontal orientation of Right end
+        top_b_points(2,2)=top_b_points(1,2);% Horizontal orientation of left end
+        btm_b_points(2,2)=btm_b_points(1,2);% Horizontal orientation of left end
+        
+    case'Midway'
+        top_b_points(3,2)=top_b_points(4,2);% Horizontal orientation of Right end
+        btm_b_points(3,2)=btm_b_points(4,2);% Horizontal orientation of Right end
+        if contact_ix==1
+            top_b_points(2,2)=top_b_points(1,2);% Horizontal orientation of left end
+            btm_b_points(2,2)=btm_b_points(1,2);% Horizontal orientation of left end
+        else
+            dir_top=top_b_points(2,:)-top_b_points(1,:);
+            dir_btm=btm_b_points(2,:)-btm_b_points(1,:);
+            
+            direction=normr(normr(dir_top)+normr(dir_btm)); %Bizecting direction by the parallelogram rule
+            
+            dir_btm=direction*(direction*dir_btm');
+            dir_top=direction*(direction*dir_top');
+            
+            btm_b_points(2,:)=btm_b_points(1,:)+dir_btm;
+            top_b_points(2,:)=top_b_points(1,:)+dir_top;
+        end
+        
 end
+
+
+%%
 %%
 % SELECT model to update
 switch source
@@ -61,13 +107,13 @@ switch source
                     %Geometry error probably definition is too high
                     disp(['Fail to generate model: HD=',num2str(HD), ', now trying:',num2str(HD+1)]);
                 else
-                   rethrow(ME) 
+                    rethrow(ME)
                 end
             end
         end
     case 'Analytical'
         
-    
+        
 end
 
 %%

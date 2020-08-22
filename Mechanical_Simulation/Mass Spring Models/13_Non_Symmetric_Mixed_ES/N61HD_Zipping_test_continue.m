@@ -22,7 +22,8 @@ obj.mechanical_model.set_shear_elastic_coefficient(5.93e5);
 obj.mechanical_model.set_direct_elastic_coefficient(5.6444e+05);
 dt=3e-9;
 T=0;
-%
+%%
+% clear; clc;
  load('N61open.mat')
 obj.mechanical_model.bottom_plate.p=obj_old.mechanical_model.bottom_plate.p;
 obj.mechanical_model.top_plate.p=obj_old.mechanical_model.top_plate.p;
@@ -38,7 +39,8 @@ clc;
 % d;%20e-7;
 % refresh_t=1e-5;
 
-base_line_dt=1e-7;
+% base_line_dt=1e-7;
+base_line_dt=1e-5;
 % max_dt=1e-5;
 max_dt=base_line_dt;
 % refresh_t=1e-5;
@@ -91,7 +93,7 @@ ov_force=obj.overall_force('Disregard_drag');
 frame=0;
 video_dir=['videos_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
 %%
-load('N61HD_Zipping')
+% load('N61HD_Zipping')
 while T<5
     %
     %     new_a=obj.mechanical_model.bottom_plate.a(2,end);

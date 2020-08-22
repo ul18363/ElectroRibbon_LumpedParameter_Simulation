@@ -26,10 +26,11 @@ function [Fy,Fx,arc_len_sim]=assign_distribute_forces_to_particles(obj,points,so
 %%
 % distribution_method='Sharp_accumulation_over_arc_length';
 % distribution_method='Sharp_accumulation_over_y';
-distribution_method='Sharp_accumulation_over_y_distance_to_zipping_point';
+% distribution_method='Sharp_accumulation_over_y_distance_to_zipping_point';
+distribution_method='Sharp_accumulation_over_height';
 % source;
 % We assume that we know the force  
-y_sim=points(:,2);
+y_sim=points(:,2); %May represent the height or the y position
 x_sim=points(:,1);
 dx_sim=diff(x_sim);
 dy_sim=diff(y_sim);
@@ -51,17 +52,18 @@ arc_len_sim=[0 ;cumsum(ds_sim)];
 %%
 switch source
     case 'COMSOL_bottom'
-        %%
         cumFy=obj.comsol_EZ_model.cumFy;
         cumFx=obj.comsol_EZ_model.cumFx;
         arc_len=obj.comsol_EZ_model.arc_len;
         ys=obj.comsol_EZ_model.ys;
+        hs=obj.comsol_EZ_model.hs;
+
     case 'COMSOL_top'
-        %%
         cumFy=obj.comsol_EZ_model.cumFy_top;
         cumFx=obj.comsol_EZ_model.cumFx_top;
         arc_len=obj.comsol_EZ_model.arc_len_top;
         ys=obj.comsol_EZ_model.ys_top;
+        hs=obj.comsol_EZ_model.hs_top;
         
         
         
@@ -76,6 +78,8 @@ switch source
         cumFx=obj.numerical_model.cumFx;
         arc_len=obj.numerical_model.arc_len;
         ys=obj.numerical_model.ys;
+        hs=obj.numerical_model.hs;
+
 
     otherwise
         error('When specifying the source of the Electrostatic Force an unrecognized source was specified.') 
@@ -97,6 +101,13 @@ switch distribution_method
         Fy=[Fy(1); diff(Fy)];
         Fx=interp1(arc_len,cumFx,ts,'linear','extrap');
         Fx=[Fx(1); diff(Fx)];
+    case 'Sharp_accumulation_over_height'
+        ts=interp1(hs,arc_len,y_sim,'linear','extrap');
+        Fy=interp1(arc_len,cumFy,ts,'linear','extrap');
+        Fy=[Fy(1); diff(Fy)];
+        Fx=interp1(arc_len,cumFx,ts,'linear','extrap');
+        Fx=[Fx(1); diff(Fx)];
+        
         
     case 'Sharp_accumulation_over_y_distance_to_zipping_point'
         %TODO important!

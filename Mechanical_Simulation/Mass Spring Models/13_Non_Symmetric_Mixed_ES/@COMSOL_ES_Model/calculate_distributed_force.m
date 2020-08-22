@@ -10,8 +10,9 @@ switch target
         end
         obj.Fy_dist=fy(ixs)';
         obj.Fx_dist=fx(ixs)';
-        obj.xs=points(ixs,1);
-        obj.ys=points(ixs,2);
+        obj.xs=obj.xs(ixs);
+        obj.ys=obj.ys(ixs);
+        obj.hs=obj.hs(ixs);
         
     case 'top'
         [fy,fx]=mphinterp(obj.model,...
@@ -27,8 +28,9 @@ switch target
         end
         obj.Fy_dist_top=fy(ixs)';
         obj.Fx_dist_top=fx(ixs)';
-        obj.xs_top=points(ixs,1);
-        obj.ys_top=points(ixs,2);
+        obj.xs_top=obj.xs_top(ixs);
+        obj.ys_top=obj.ys_top(ixs);
+        obj.hs_top=obj.hs_top(ixs);
     otherwise
         error('Target of force estimation in COMSOL model is not valid, try top or bottom please.')
         

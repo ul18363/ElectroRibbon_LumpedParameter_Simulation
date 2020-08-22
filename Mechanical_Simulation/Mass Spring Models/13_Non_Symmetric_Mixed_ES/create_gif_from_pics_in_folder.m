@@ -1,5 +1,5 @@
 %% Define folder with JPEGs
-function create_gif_from_pics_in_folder(folder_name,new_name,scale,pic_extension,delay_time)
+function create_gif_from_pics_in_folder(folder_name,new_name,scale,pic_extension,delay_time,skip_n)
 %folder_name='video_folder_130';
 %pic_extension='.jpeg';
 %% Retrieve all jpegs paths
@@ -13,7 +13,9 @@ end
 
 %%
 images{length(files)}=[];
-for i=1:length(files)
+ixs=1:skip_n:length(files);
+
+for i=1:length(ixs)
     if ~isempty(scale)
     images{i} = imresize(imread(files{i}),scale);
     else

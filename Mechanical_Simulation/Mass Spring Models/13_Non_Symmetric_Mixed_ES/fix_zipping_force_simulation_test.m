@@ -76,7 +76,7 @@ ov_force=obj.overall_force('Disregard_drag');
 %
 frame=0;
 video_dir=['videos_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
-%
+%% Simulation Loop
 while T<5
     %
     %     new_a=obj.mechanical_model.bottom_plate.a(2,end);
@@ -120,7 +120,7 @@ while T<5
     
     
     success_flag=false;
-    while~success_flag
+    while~success_flag % Adaptive Scale Mechanical Timestep
         success_flag=obj.perform_timestep(dt,'Manual_concentrated_zip_force');
         if success_flag && max_dt>dt
             dt=dt*drunk_scale;
@@ -133,7 +133,8 @@ while T<5
         end
         
     end
-    if loop_condition_breaking(dt)
+    
+    if loop_condition_breaking(dt) % Simulation scape criteria 
         break
     end
     %     success_flag=perform_timestep(obj,dt)

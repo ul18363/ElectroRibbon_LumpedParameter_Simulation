@@ -1,6 +1,7 @@
 clear;clc; close all;
+%Initialize model
 N=21;
-
+% N=61;
 L=0.1; sheet_width=0.0127; thickness=100e-6;
 base_l=0.01;clip_l=0.01;
 ins_thickness=130e-6;
@@ -10,8 +11,8 @@ M=60e-3;
 obj=EZModel(sht_dms,N,base_l,clip_l,ins_thickness,M);
 % obj.mechanical_model.set_damping_factor(1);
 obj.mechanical_model.set_damping_factor(0);
-obj.mechanical_model.set_shear_elastic_coefficient(2.4e4);
-% obj.mechanical_model.set_shear_elastic_coefficient(5.93e5);
+obj.mechanical_model.set_shear_elastic_coefficient(2.4e4); %N21
+% obj.mechanical_model.set_shear_elastic_coefficient(5.93e5); %N61
 % obj.mechanical_model.set_direct_elastic_coefficient(5.6444e+05);
 dt=3e-9;
 T=0;
@@ -21,31 +22,48 @@ T=0;
 % obj.voltage=15e3;%10e4;
 obj.mechanical_model.halt_velocities();
 % obj.update_ES_model('COMSOL')
-obj.mechanical_model.set_damping_factor(1);
-obj.mechanical_model.set_internal_damping_factor(0.01*0);
+obj.mechanical_model.set_damping_factor(0.5);
+obj.mechanical_model.set_internal_damping_factor(0);
 clc;
 % T=0;
-dt=1e-10;%20e-7;
+% dt=1e-10;%20e-7;
+% Load saved open position
 %%
+load('N21Open.mat')
+obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
+obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
+% load('N61open.mat')
+% obj.mechanical_model.top_plate.p=obj_old.mechanical_model.top_plate.p;
+% obj.mechanical_model.bottom_plate.p=obj_old.mechanical_model.bottom_plate.p;
+
+obj.voltage=6e3;
+obj.update_ES_model('COMSOL')
+% Perform single timestep
+%%
+dt=1e-10;
 % max_dt=1e-8;
-base_line_dt=1e-7;
+base_line_dt=1e-6;
 % max_dt=1e-5;
 max_dt=base_line_dt;
 % refresh_t=1e-5;
 
 % refresh_t=1e-4; %Plot refresh
 % dispT=T+refresh_t;
-refresh_t=base_line_dt*10; %Plot refresh
+refresh_t=base_line_dt*100; %Plot refresh
 dispT=T+refresh_t;
 
 success_flag=false;
 
 % refresh_t2=1e-4;
-refresh_t2=base_line_dt*10; % Print in Screen
+refresh_t2=base_line_dt*100; % Print in Screen
 dispT2=T+refresh_t2;
 
 refresh_t3=1e-4; % Data Recording
 dispT3=T+refresh_t3;
+
+% refresh_t_comsol=1e-3; % COMSOL Electrostatic Model Refresh 
+refresh_t_comsol=1e-3; % Data Recording
+dispTCOMSOL=T+refresh_t_comsol;
 
 a=0;
 v=0;
@@ -68,6 +86,10 @@ while~success_flag
     end
     
 end
+%% Go crazy with simulation
+frame=0;
+video_dir=['videos_N',num2str(N),'_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
+
 buff_len=5000;
 y_pos_cells={};
 t_cells={};
@@ -90,6 +112,8 @@ filt_a_btm=obj.mechanical_model.bottom_plate.a(2,:);
 
 
 % obj.perform_timestep(dt)
+
+%%
 while T<5
     
     %     new_a=obj.mechanical_model.bottom_plate.a(2,end);
@@ -154,77 +178,32 @@ while T<5
     %     success_flag=perform_timestep(obj,dt)
     T=T+dt;
     %     disp(dt)
-    if T>=dispT
-        dispT=T+refresh_t;
+    if (refresh_t_comsol>0) &&( T>=dispTCOMSOL)
+        dispTCOMSOL=T+refresh_t_comsol;
         try
-            %         obj.update_ES_model('COMSOL')
-            %         disp("COMSOL update succesfull")
+            obj.update_ES_model('COMSOL')
+            disp("COMSOL update succesfull")
         catch ME
             disp("Try to Update COMSOL model but failed")
             
             
         end
-        subplot(2,2,1)
-        hold off
-        plot(obj.mechanical_model.top_plate.p(1,:),obj.mechanical_model.top_plate.p(2,:),'r')
-        hold on
-        plot(obj.mechanical_model.bottom_plate.p(1,:),obj.mechanical_model.bottom_plate.p(2,:),'b')
-        xlabel('Position')
-        %         plot(obj.mechanical_model.bottom_plate.p(1,:),obj.mechanical_model.bottom_plate.p(2,:),'r-x')
-        %         hold on
-        %         grid on
-        %         plot(obj.mechanical_model.top_plate.p(1,:),obj.mechanical_model.top_plate.p(2,:),'b-o')
-        %         axis('equal')
-        %         net_f_top=sum(obj.mechanical_model.top_plate.f,2);
-        %         net_f_btm=sum(obj.mechanical_model.bottom_plate.f,2);
-        %         %         disp([num2str(T),': Fy_btm[',num2str(net_f_btm(2)),'] Fy_top[',num2str(net_f_top(2)),']'])
-        subplot(2,2,2)
-        hold off
-        %         plot(obj.mechanical_model.top_plate.f(2,:),'r')
-        plot(obj.mechanical_model.top_plate.f(2,:),'r')
-        hold on
-        %         plot(obj.mechanical_model.bottom_plate.f(2,:),'b')
-        plot(obj.mechanical_model.bottom_plate.f(2,:),'b')
-        if true
-            plot(obj.mechanical_model.top_plate.f_internal_damping(2,:),'r-x')
-            plot(obj.mechanical_model.bottom_plate.f_internal_damping(2,:),'b-x')
-        end
-        
-        if true
-            plot(obj.mechanical_model.top_plate.f_elastic(2,:),'r-v')
-            plot(obj.mechanical_model.bottom_plate.f_elastic(2,:),'b-v')
-        end
-        if false && ~isempty(obj.mechanical_model.top_plate_ext_f)
-            plot(obj.mechanical_model.top_plate_ext_f(2,:),'r-x')
-            plot(obj.mechanical_model.bottom_plate_ext_f(2,:),'b-x')
-        end
-        xlabel('Forces')
-        
-        subplot(2,2,3)
-        hold off
-%         plot(obj.mechanical_model.top_plate.a(2,:),'r--x')
-%         hold on
-%         plot(obj.mechanical_model.bottom_plate.a(2,:),'b--x')
-        plot(filt_a_top,'r--o')
-        hold on
-        plot(filt_a_btm,'b--o')
-        xlabel('Acceleration')
-        
-        subplot(2,2,4)
-        hold off
-        plot(obj.mechanical_model.top_plate.v(2,:),'r--x')
-        hold on
-        plot(obj.mechanical_model.bottom_plate.v(2,:),'b--x')
-        plot(filt_v_top,'r--o')
-        plot(filt_v_btm,'b--o')
-        
-        xlabel('Velocity')
-        
+    end
+    if T>=dispT
+        dispT=T+refresh_t;
+        full_kinematics
+
         drawnow
+        if ~exist(video_dir, 'dir')
+            mkdir(video_dir)
+        end
+        frame=frame+1;
+        
+        saveas(gcf(),[video_dir,'/',num2str(frame),'.png'],'png')
         
     end
     
-    if obj.mechanical_model.contact_ix==obj.N-1
+    if obj.mechanical_model.contact_ix==obj.N-4
         disp('Zipping is complete')
         break
     end
@@ -244,3 +223,7 @@ y_rec=cat(1,y_pos_cells{:});
 figure();
 plot(t_rec,y_rec)
 grid on
+
+%%
+pad_files(video_dir,'.png','%04.f')
+create_gif_from_pics_in_folder(video_dir,'COMSOL_zip',[],'.png',0.01)

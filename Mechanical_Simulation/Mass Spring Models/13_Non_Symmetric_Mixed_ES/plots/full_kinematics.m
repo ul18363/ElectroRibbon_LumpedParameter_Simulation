@@ -14,22 +14,27 @@ xlabel('Position')
 %         %         disp([num2str(T),': Fy_btm[',num2str(net_f_btm(2)),'] Fy_top[',num2str(net_f_top(2)),']'])
 subplot(2,2,2)
 hold off
-%         plot(obj.mechanical_model.top_plate.f(2,:),'r')
-plot(obj.mechanical_model.top_plate.f(2,:),'r-s')
-hold on
-%         plot(obj.mechanical_model.bottom_plate.f(2,:),'b')
-plot(obj.mechanical_model.bottom_plate.f(2,:),'b-s')
-if true
+if false
+    %         plot(obj.mechanical_model.top_plate.f(2,:),'r')
+    plot(obj.mechanical_model.top_plate.f(2,:),'r-s')
+    hold on
+    %         plot(obj.mechanical_model.bottom_plate.f(2,:),'b')
+    plot(obj.mechanical_model.bottom_plate.f(2,:),'b-s')
+end
+if false
     plot(obj.mechanical_model.top_plate.f_internal_damping(2,:),'r-x')
+    hold on
     plot(obj.mechanical_model.bottom_plate.f_internal_damping(2,:),'b-x')
 end
 
-if true
+if false
     plot(obj.mechanical_model.top_plate.f_elastic(2,:),'r-v')
+    hold on
     plot(obj.mechanical_model.bottom_plate.f_elastic(2,:),'b-v')
 end
 if ~isempty(obj.mechanical_model.top_plate_ext_f)
     plot(obj.mechanical_model.top_plate_ext_f(2,:),'r-x')
+    hold on
     plot(obj.mechanical_model.bottom_plate_ext_f(2,:),'b-x')
 end
 xlabel('Forces')
@@ -53,3 +58,4 @@ plot(obj.mechanical_model.bottom_plate.v(2,:),'b--x')
 % plot(filt_v_btm,'b--o')
 
 xlabel('Velocity')
+sgtitle(['Analysis at T:', num2str(T),' s'])
