@@ -7,6 +7,10 @@ function calculate_electrostatic_forces(obj,force_source)
 % force_source='Manual_homogeneous_dist_force';
 
 switch force_source
+    case 'SKIP'
+        f=[zeros(1,obj.N);ones(1,obj.N)]*0;
+        obj.mechanical_model.bottom_plate_ext_f=f;
+        obj.mechanical_model.top_plate_ext_f=-f;  
     case 'Manual_homogeneous_dist_force'
         f=[zeros(1,obj.N);ones(1,obj.N)]*obj.voltage*obj.M/obj.N;
         obj.mechanical_model.bottom_plate_ext_f=f;

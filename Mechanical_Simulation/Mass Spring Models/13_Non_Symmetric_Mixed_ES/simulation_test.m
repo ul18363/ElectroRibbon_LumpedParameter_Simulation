@@ -2,6 +2,7 @@ clear;clc; close all;
 %Initialize model
 N=21;
 % N=61;
+% N=130;
 L=0.1; sheet_width=0.0127; thickness=100e-6;
 base_l=0.01;clip_l=0.01;
 ins_thickness=130e-6;
@@ -13,7 +14,7 @@ obj=EZModel(sht_dms,N,base_l,clip_l,ins_thickness,M);
 obj.mechanical_model.set_damping_factor(0);
 obj.mechanical_model.set_shear_elastic_coefficient(2.4e4); %N21
 % obj.mechanical_model.set_shear_elastic_coefficient(5.93e5); %N61
-% obj.mechanical_model.set_direct_elastic_coefficient(5.6444e+05);
+% obj.mechanical_model.set_direct_elastic_coefficient(5.7e6); %N130 
 dt=3e-9;
 T=0;
 
@@ -22,24 +23,37 @@ T=0;
 % obj.voltage=15e3;%10e4;
 obj.mechanical_model.halt_velocities();
 % obj.update_ES_model('COMSOL')
-obj.mechanical_model.set_damping_factor(0.5);
+% obj.mechanical_model.set_damping_factor(0.5);
+obj.mechanical_model.set_damping_factor(10);
+% obj.mechanical_model.set_damping_factor(0);
 obj.mechanical_model.set_internal_damping_factor(0);
 clc;
 % T=0;
 % dt=1e-10;%20e-7;
 % Load saved open position
-%%
-load('N21Open.mat')
+
+
+load('data/N21Open.mat')
 obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
 obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
+
 % load('N61open.mat')
 % obj.mechanical_model.top_plate.p=obj_old.mechanical_model.top_plate.p;
 % obj.mechanical_model.bottom_plate.p=obj_old.mechanical_model.bottom_plate.p;
+% 
+% load('N130_semi_open.mat')
+% obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
+% obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
 
-obj.voltage=6e3;
+%%%%% Electrostatic Simulation
+obj.voltage=3e3;
 obj.update_ES_model('COMSOL')
+%%%%% Mechanical Simulation
+% obj.voltage=0e3;
+% obj.update_ES_model('SKIP')
+
 % Perform single timestep
-%%
+%
 dt=1e-10;
 % max_dt=1e-8;
 base_line_dt=1e-6;
@@ -62,8 +76,9 @@ refresh_t3=1e-4; % Data Recording
 dispT3=T+refresh_t3;
 
 % refresh_t_comsol=1e-3; % COMSOL Electrostatic Model Refresh 
-refresh_t_comsol=1e-3; % Data Recording
+refresh_t_comsol=1e-3; % COMSOL Electrostatic Model Refresh 
 dispTCOMSOL=T+refresh_t_comsol;
+% refresh_t_comsol=-1; % Disable COMSOL Electrostatic Model Refresh 
 
 a=0;
 v=0;

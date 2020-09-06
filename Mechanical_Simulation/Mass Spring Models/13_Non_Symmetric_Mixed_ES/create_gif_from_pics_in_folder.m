@@ -12,20 +12,22 @@ for i=1:length(listing)
 end
 
 %%
-images{length(files)}=[];
 ixs=1:skip_n:length(files);
 
-for i=1:length(ixs)
+images{length(ixs)}=[];
+n=0;
+for i=ixs
+    n=n+1;
     if ~isempty(scale)
-    images{i} = imresize(imread(files{i}),scale);
+    images{n} = imresize(imread(files{i}),scale);
     else
-    images{i} =imread(files{i});
+    images{n} =imread(files{i});
     end
 end
 %%
 file_name=[new_name,'_gif.gif'];
 % delay_time=0.01;
-for i=1:length(files)
+for i=1:length(ixs)
 %     if i>50
 %         break
 %     end
