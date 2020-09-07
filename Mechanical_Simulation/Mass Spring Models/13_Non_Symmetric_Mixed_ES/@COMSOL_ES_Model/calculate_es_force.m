@@ -24,8 +24,8 @@ obj.ys=points_btm(:,2);
 obj.xs_top=points_top(:,1);
 obj.ys_top=points_top(:,2);
 
-y_top_interp=interp1(obj.xs_top,obj.ys_top,obj.xs);
-y_btm_interp=interp1(obj.xs,obj.ys,obj.xs_top);
+y_top_interp=interp1(obj.xs_top,obj.ys_top,obj.xs,'linear','extrap');
+y_btm_interp=interp1(obj.xs,obj.ys,obj.xs_top,'linear','extrap');
 
 obj.hs=y_top_interp-obj.ys;
 obj.hs_top=obj.ys_top-y_btm_interp;

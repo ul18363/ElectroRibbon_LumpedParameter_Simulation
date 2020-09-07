@@ -27,7 +27,8 @@ function [Fy,Fx,arc_len_sim]=assign_distribute_forces_to_particles(obj,points,so
 % distribution_method='Sharp_accumulation_over_arc_length';
 % distribution_method='Sharp_accumulation_over_y';
 % distribution_method='Sharp_accumulation_over_y_distance_to_zipping_point';
-distribution_method='Sharp_accumulation_over_height';
+% distribution_method='Sharp_accumulation_over_height';
+distribution_method=obj.distribution_method;
 % source;
 % We assume that we know the force  
 y_sim=points(:,2); %May represent the height or the y position

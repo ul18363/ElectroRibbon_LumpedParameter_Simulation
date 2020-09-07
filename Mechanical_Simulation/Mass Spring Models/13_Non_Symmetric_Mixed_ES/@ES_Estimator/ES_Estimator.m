@@ -14,7 +14,7 @@ classdef ES_Estimator < handle
         thickness
         insulator_thickness
         dropVolume
-        
+        distribution_method
         % Physical parameters
         eMed
         eAir
@@ -31,7 +31,7 @@ classdef ES_Estimator < handle
             obj.base_l=base_l;
             obj.voltage=voltage;
             obj.insulator_thickness=insulator_thickness;
-            
+            obj.distribution_method='Sharp_accumulation_over_height';
             % Initialize parallel plate model parameters
             obj.eMed = 2.75; obj.eAir = 1; obj.eIns = 4.62; 
             obj.EMaxMed = 20e6; obj.EMaxAir = 3e6; obj.dropVolume = 10;
@@ -39,7 +39,7 @@ classdef ES_Estimator < handle
         end
 
         
-        add_analytical_model(obj);
+        add_analytical_model(obj,initial_points);
         add_comsol_model(obj,bottom_points,top_points);
         add_comsol_flange_model(obj,initial_points);
         
