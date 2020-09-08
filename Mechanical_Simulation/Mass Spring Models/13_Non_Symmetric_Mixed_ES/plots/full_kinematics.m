@@ -32,6 +32,11 @@ if false
     hold on
     plot(obj.mechanical_model.bottom_plate.f_elastic(2,:),'b-v')
 end
+if true
+    plot(obj.mechanical_model.top_plate.f_damping(2,:),'r-o')
+    hold on
+    plot(obj.mechanical_model.bottom_plate.f_damping(2,:),'b-o')
+end
 if ~isempty(obj.mechanical_model.top_plate_ext_f)
     plot(obj.mechanical_model.top_plate_ext_f(2,:),'r-x')
     hold on
