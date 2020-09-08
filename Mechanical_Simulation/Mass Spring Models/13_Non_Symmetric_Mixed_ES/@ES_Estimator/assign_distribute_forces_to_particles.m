@@ -73,15 +73,21 @@ switch source
         cumFx=obj.comsol_flange_model.cumFx;
         arc_len=obj.comsol_flange_model.arc_len;
         ys=obj.comsol_flange_model.ys;
-        
-    case 'PPM'   
+
+    case 'Analytical_bottom'   
         cumFy=obj.numerical_model.cumFy;
         cumFx=obj.numerical_model.cumFx;
         arc_len=obj.numerical_model.arc_len;
         ys=obj.numerical_model.ys;
         hs=obj.numerical_model.hs;
-
-
+        
+    case 'Analytical_top'   
+        cumFy=obj.numerical_model.cumFy_top;
+        cumFx=obj.numerical_model.cumFx_top;
+        arc_len=obj.numerical_model.arc_len_top;
+        ys=obj.numerical_model.ys_top;
+        hs=obj.numerical_model.hs_top;
+        
     otherwise
         error('When specifying the source of the Electrostatic Force an unrecognized source was specified.') 
 end

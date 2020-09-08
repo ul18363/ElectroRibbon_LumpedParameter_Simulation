@@ -7,16 +7,16 @@
 % clear; clc;
 function calculate_distributed_force(obj)
 % Fy=parallel_sheet_model_ES(x,dy)
-% Returns the electrostatic force between two sheets assuming a "parallel 
+% Returns the electrostatic force between two sheets assuming a "parallel
 % sheet" model. Using the following parameters
-% 
+%
 % Backing material:
 % Consider in the configuration of a simply supported beam
 % t = 100e-6;% t height (thickness) of backing material /m
 % d = 0.0127;% d depth (width) of backing material /m
 % L = 0.1;% L length of backing material /m
 % dL = 1e-4;% dL length of backing material's element /m
-% discrete_points =1000;% discrete_points: number of backing material's elements /unit   
+% discrete_points =1000;% discrete_points: number of backing material's elements /unit
 % E = 10e9;% E young's modulus /N/(m^2)
 % % Electrical properties
 % eMed = 2.75;    % eMed relative medium permittivity (silicone oil) % silicone oil http://www.clearcoproducts.com/pdf/puresilicone/Dielectric_Properties_Pure_Silicone_Fluids.pdf
@@ -30,7 +30,7 @@ function calculate_distributed_force(obj)
 %
 % Droplet volume and mass options:
 % dropVolume = 100*1e-6; % m^3 = 1e6 ml
-% V = 10000; % V    
+% V = 10000; % V
 
 dropVolume=obj.dropVolume;
 d=obj.sheet_width;
@@ -43,11 +43,22 @@ EMaxMed=obj.EMaxMed;
 EMaxAir=obj.EMaxAir;
 V=obj.voltage;
 % discrete_points=obj.points;
-x=obj.points(:,1);
-h=obj.points(:,2);
+
+%% Define Geometry for force estimation
+
+% top_points
+% btm_points
+x=obj.btm_points(:,1);
+y_btm=obj.btm_points(:,2);
+y_top=interp1(obj.top_points(:,1),obj.top_points(:,2),x);
+
+% h=obj.points(:,2);
+h=y_top-y_btm+obj.tIns*2;
+
 % y=2*(dy+tIns);
 % close all;
-%% input options
+%% Calculate Everything based on the X coordinates of the bottom plate 
+% input options
 simulateBreakdown = 1;
 simulatePartialBreakdown = 1;
 %% Electrical properties
@@ -63,14 +74,14 @@ tMinMed = (V/EMaxMed - (eMed*tIns)/eIns);
 tMinAir = (V/EMaxAir - (eAir*tIns)/eIns);
 
 %% calculate Wes for zipped elements (t_medium << t_insulator)
-% zippedWes = 0.5*(eIns*e0*d*V^2)/(tIns^2);    
+% zippedWes = 0.5*(eIns*e0*d*V^2)/(tIns^2);
 
 %% Initial Volume: calculate cumulative volume at each node
 volumes = zeros(1,length(xs));
 for i = 1:length(xs)
     volumes(i) = -dL*trapz(2.*hs(1:i))*d; % 2.* = top and bottom sides
 end
-    
+
 %% INITIAL: determine loaded simply-supported sheet shape w/ electrostatic force applied
 % determine electrostatic distributed load at each element based upon
 % current beam deflection N.B. use -ve value of ysMass since deflection
@@ -80,7 +91,7 @@ initialWes = zeros(1,length(xs));
 dropW = max(xs(volumes < dropVolume/2)); % maximum length that contains droplet
 if isempty(dropW)
     dropW = 0;
-end    
+end
 %     fprintf('~~~ Length which contains droplet is %2.3f m ~~~\n', dropW);
 for i = 1:length(xs)
     if xs(i) < dropW %|| xs(i) > L-dropW (Only Simulating on one half)
@@ -98,13 +109,30 @@ for i = 1:length(xs)
         end
     end
 end
+
+
 Fy_dist=initialWes;
 
+%% Results for Bottom Plate
 obj.Fy_dist=Fy_dist;
 obj.Fx_dist=zeros(size(Fy_dist));
 % obj.cumFy=cumsum(Fy);
 % obj.cumFx=cumsum(Fx);
 obj.xs=xs;
-obj.ys=hs;
-return 
+% x=obj.btm_points(:,1);
+% y_btm=obj.btm_points(:,2);
+obj.ys=interp1(obj.btm_points(:,1),obj.btm_points(:,2),xs);
+
+obj.hs=hs;
+
+
+%% Interpolate Results for Top plate
+obj.xs_top=xs;
+obj.ys_top=interp1(obj.top_points(:,1),obj.top_points(:,2),xs);
+obj.hs_top=hs;
+obj.Fy_dist_top=Fy_dist;
+obj.Fx_dist_top=zeros(size(Fy_dist));
+
+
+return
 

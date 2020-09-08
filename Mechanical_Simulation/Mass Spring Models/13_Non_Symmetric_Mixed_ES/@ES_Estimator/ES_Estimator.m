@@ -39,7 +39,7 @@ classdef ES_Estimator < handle
         end
 
         
-        add_analytical_model(obj,initial_points);
+        add_analytical_model(obj,bottom_points,top_points);
         add_comsol_model(obj,bottom_points,top_points);
         add_comsol_flange_model(obj,initial_points);
         

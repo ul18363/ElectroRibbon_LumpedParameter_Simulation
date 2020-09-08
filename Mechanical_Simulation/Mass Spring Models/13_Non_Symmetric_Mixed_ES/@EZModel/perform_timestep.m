@@ -51,10 +51,17 @@ if contact_flag && (obj.voltage>0)
     % 5.4 - Update Electrostatic Model
     if isequal(source_of_es,'COMSOL')
         try
-            obj.update_ES_model('COMSOL')
+            obj.update_ES_model('COMSOL');
             disp("COMSOL update succesfull")
         catch ME
             disp("Try to Update COMSOL model but failed, keeping the old model.")
+        end
+    elseif isequal(source_of_es,'Analytical')
+        try
+            obj.update_ES_model('Analytical');
+            disp("Analytical update succesfull")
+        catch ME
+            disp("Try to Update Analytical model but failed, keeping the old model.")
         end
     end
     %     obj.electrostatic_model.assign_distribute_forces_to_particles(obj.mechanical_model.bottom_plate.p','COMSOL')

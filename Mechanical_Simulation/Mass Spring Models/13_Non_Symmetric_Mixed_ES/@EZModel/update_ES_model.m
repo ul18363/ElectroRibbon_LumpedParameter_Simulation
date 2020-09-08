@@ -112,16 +112,16 @@ switch source
             end
         end
     case 'Analytical'
+        HD=-10;
+        t=10.^(HD:0.02:0);
+        
+        t=[0 t];
+        top_points= BezierEstimator.bezierInterp2(top_b_points',t);
+        bottom_points= BezierEstimator.bezierInterp2(btm_b_points',t);
+        %This one won't fail that easily
+        obj.electrostatic_model.add_analytical_model(bottom_points',top_points') %Update or Create a whole new model is equally expensive.
         
         
 end
-
-%%
-% plot(top_points(1,:),top_points(2,:),'r-x')
-% hold on
-% grid on
-% plot(bottom_points(1,:),bottom_points(2,:),'b-x')
-% plot(obj.mechanical_model.top_plate.p(1,:),obj.mechanical_model.top_plate.p(2,:),'k-o')
-% plot(obj.mechanical_model.bottom_plate.p(1,:),obj.mechanical_model.bottom_plate.p(2,:),'k-o')
 
 end

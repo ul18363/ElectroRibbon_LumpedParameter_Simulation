@@ -11,7 +11,11 @@ classdef Parallel_Plates_ES_Model < handle
 %         L
         %Parameters for model
         version
-        points
+                
+
+        top_points
+        btm_points
+        
         eMed
         eAir
         eIns
@@ -22,6 +26,7 @@ classdef Parallel_Plates_ES_Model < handle
         sample_size
         voltage
         sheet_width
+        
         %Output
         Fy_dist
         Fx_dist
@@ -33,9 +38,28 @@ classdef Parallel_Plates_ES_Model < handle
         ys
         ds
         arc_len
+        hs
+        
+        Fy_dist_top
+        Fx_dist_top
+        Fy_top
+        Fx_top
+        cumFy_top
+        cumFx_top
+        xs_top
+        ys_top
+        ds_top
+        arc_len_top
+        hs_top        
+
+
+
+        
+        
+        
     end
     methods
-        function obj=Parallel_Plates_ES_Model(points,voltage,eMed,eAir,eIns,tIns,EMaxMed,EMaxAir,dropVolume,sheet_width)
+        function obj=Parallel_Plates_ES_Model(btm_points,top_points,voltage,eMed,eAir,eIns,tIns,EMaxMed,EMaxAir,dropVolume,sheet_width)
             % Parallel_Plates_ES_Model
             % obj=Parallel_Plates_ES_Model(points,voltage,eMed,eAir,eIns,tIns,EMaxMed,EMaxAir,dropVolume,sheet_width)
             %  
@@ -48,7 +72,8 @@ classdef Parallel_Plates_ES_Model < handle
             
             % Constructor
             obj.voltage=voltage;
-            obj.points=points;
+            obj.top_points=top_points;
+            obj.btm_points=btm_points;
             obj.eMed=eMed;
             obj.eAir=eAir;
             obj.eIns=eIns;
