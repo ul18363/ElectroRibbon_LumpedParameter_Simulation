@@ -1,1 +1,0 @@
-function model = create_model(btm_plate_coords,top_plate_coords)
