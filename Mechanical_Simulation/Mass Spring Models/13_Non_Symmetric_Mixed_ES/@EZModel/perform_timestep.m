@@ -30,8 +30,8 @@ success_flag=obj.mechanical_model.perform_timestep(dt);
 %  If contact and voltage are on.
 if contact_flag && (obj.voltage>0)
     new_contact_ix=obj.mechanical_model.contact_ix+1;
-    disp(['Contact at: ',num2str(new_contact_ix),'| dt:',...
-        num2str(dt),'| dt_contact:',num2str(contact_dt)])
+%     disp(['Contact at: ',num2str(new_contact_ix),'| dt:',...
+%         num2str(dt),'| dt_contact:',num2str(contact_dt)])
     
     
     % 5.1 - Go Back
@@ -52,16 +52,16 @@ if contact_flag && (obj.voltage>0)
     if isequal(source_of_es,'COMSOL')
         try
             obj.update_ES_model('COMSOL');
-            disp("COMSOL update succesfull")
+%             disp("COMSOL update succesfull")
         catch ME
-            disp("Try to Update COMSOL model but failed, keeping the old model.")
+%             disp("Try to Update COMSOL model but failed, keeping the old model.")
         end
     elseif isequal(source_of_es,'Analytical')
         try
             obj.update_ES_model('Analytical');
-            disp("Analytical update succesfull")
+%             disp("Analytical update succesfull")
         catch ME
-            disp("Try to Update Analytical model but failed, keeping the old model.")
+%             disp("Try to Update Analytical model but failed, keeping the old model.")
         end
     end
     %     obj.electrostatic_model.assign_distribute_forces_to_particles(obj.mechanical_model.bottom_plate.p','COMSOL')
