@@ -87,8 +87,8 @@ switch force_source
     case 'Analytical' %Parallel Plates model
 %         obj.update_electrostatic_forces('Analytical') %If I want to
 %         update at every loop!
-        btm_pts=obj.mechanical_model.bottom_plate.p;
-        top_pts=obj.mechanical_model.bottom_plate.p;
+%         btm_pts=obj.mechanical_model.bottom_plate.p;
+%         top_pts=obj.mechanical_model.bottom_plate.p;
         %ArcLen
         %Height
         %%

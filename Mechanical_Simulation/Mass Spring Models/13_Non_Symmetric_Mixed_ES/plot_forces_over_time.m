@@ -1,5 +1,5 @@
 clear;clc; close all;
-folder_name='data2';
+folder_name='e04_old_results_High_voltage';
 extension='.mat';
 listing=dir(folder_name);
 files={};

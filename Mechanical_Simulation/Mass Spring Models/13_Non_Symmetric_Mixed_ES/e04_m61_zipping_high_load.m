@@ -3,68 +3,37 @@ clear;clc; close all;
 %voltage_values=[5,6,8,10,12]*1000;
 % voltage_values=[12,10,8,6,5]*1000;
 % voltage_values=[12,10,8,6,5]*1000;
-voltage_values=[6,5,4,3,2.5,2]*1000;
+% voltage_values=[6,5,4,3,2.5,2]*1000;
+% voltage_values=[5,4,3,2.5,2]*1000;
+voltage_values=[6,5,4,3,2.5,2,1.5,1]*1000;
 % voltage_values=[10,12]*1000;
 % voltage_values=[6]*1000;
 
-
-%     N=21;
-%     N=61;
-%     N=130;
-
-for N=[21,61,130]
-    
-    voltage_ins=0;
+for voltage_ins=voltage_values
+    voltage_ins=6000;
     clear obj obj2
+    %     N=21;
+    N=61;
+    %     N=130;
     L=0.1; sheet_width=0.0127; thickness=100e-6;
     base_l=0.01;clip_l=0.01;
     ins_thickness=130e-6;
     sht_dms=[L sheet_width thickness];
-    M=8e-3;
+    M=61e-3;
     obj=EZModel(sht_dms,N,base_l,clip_l,ins_thickness,M);
     obj.mechanical_model.set_damping_factor(0);
     
     T=0;
     
+    
     obj.mechanical_model.set_internal_damping_factor(0);
     
     clc;
     
-%     if N==21
-%         damp_factor=10;%10-0.01 s
-%         base_line_dt=1e-6; % N130
-%         load(['e04_calibration_flange/','resting_condition_N021_COMSOL_Validated_M008.mat'])
-%         obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
-%         obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
-%         shear_coeff=obj2.mechanical_model.bottom_plate.k_trans;
-%         obj.mechanical_model.set_damping_factor(damp_factor);
-%         obj.mechanical_model.set_shear_elastic_coefficient(shear_coeff); %N21
-%     elseif N==61
-%         damp_factor=1;%1-0.01s
-%         base_line_dt=1e-6; % N130
-%         load(['e04_calibration_flange/','resting_condition_N061_COMSOL_Validated_M008.mat'])
-%         obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
-%         obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
-%         shear_coeff=obj2.mechanical_model.bottom_plate.k_trans;
-%         %         obj.mechanical_model.set_damping_factor(1);
-%         obj.mechanical_model.set_damping_factor(damp_factor);
-%         obj.mechanical_model.halt_velocities();
-%         obj.mechanical_model.set_shear_elastic_coefficient(shear_coeff); %N61
-%     elseif N==130
-%         damp_factor=0.1;%0.1-0.01s
-%         base_line_dt=5e-7; % N130
-%         load(['e04_calibration_flange/','resting_condition_N130_COMSOL_Validated_M008.mat'])
-%         obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
-%         obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
-%         shear_coeff=obj2.mechanical_model.bottom_plate.k_trans;
-%         obj.mechanical_model.set_damping_factor(damp_factor);
-%         obj.mechanical_model.set_shear_elastic_coefficient(shear_coeff); %N130
-%     end
-
     if N==21
         damp_factor=10;%10-0.01 s
         base_line_dt=1e-6; % N21
-        load(['e04_starting_conditions/','e04_caliobration_N21_m8.mat'])
+        load(['e04_starting_conditions/','e04_caliobration_N21_m61.mat'])
         obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
         obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
         shear_coeff=obj2.mechanical_model.bottom_plate.k_trans;
@@ -73,7 +42,7 @@ for N=[21,61,130]
     elseif N==61
         base_line_dt=1e-6; % N61
         damp_factor=100;
-        load(['e04_starting_conditions/','e04_caliobration_N61_m8.mat'])
+        load(['e04_starting_conditions/','e04_caliobration_N61_m61.mat'])
         obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
         obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
         shear_coeff=obj2.mechanical_model.bottom_plate.k_trans;
@@ -84,19 +53,18 @@ for N=[21,61,130]
     elseif N==130
         damp_factor=0.1;%0.1-0.01s
         base_line_dt=5e-7; % N130
-        load(['e04_starting_conditions/','e04_caliobration_N130_m8.mat'])
+        load(['e04_starting_conditions/','e04_caliobration_N130_m61.mat'])
         obj.mechanical_model.top_plate.p=obj2.mechanical_model.top_plate.p;
         obj.mechanical_model.bottom_plate.p=obj2.mechanical_model.bottom_plate.p;
         shear_coeff=obj2.mechanical_model.bottom_plate.k_trans;
         obj.mechanical_model.set_damping_factor(damp_factor);
         obj.mechanical_model.set_shear_elastic_coefficient(shear_coeff); %N130
     end
-    
     %%%%% Electrostatic Simulation
     % obj.voltage=3e3;
     obj.voltage=voltage_ins;
-    es_source='SKIP';%'COMSOL'
-    obj.update_ES_model(es_source)
+    source_es='Analytical';
+    obj.update_ES_model(source_es)
     %%%%% Mechanical Simulation
     % obj.voltage=0e3;
     % obj.update_ES_model('SKIP')
@@ -104,7 +72,6 @@ for N=[21,61,130]
     % Perform single timestep
     %
     dt=1e-10;
-%     base_line_dt=5e-7; % N130
     
     max_dt=base_line_dt;
     % refresh_t=1e-5;
@@ -140,7 +107,7 @@ for N=[21,61,130]
     %
     success_flag=false;
     while~success_flag
-        success_flag=obj.perform_timestep(dt,es_source);
+        success_flag=obj.perform_timestep(dt,source_es);
         if success_flag && max_dt>dt
             dt=dt*drunk_scale;
         else
@@ -152,11 +119,12 @@ for N=[21,61,130]
         end
         
     end
-    %% Go crazy with simulation
+    % Go crazy with simulation
     frame=0;
-    simulation_identifier=['N',num2str(N),'_m',num2str(obj.M*1000)];
+    simulation_identifier=['N',num2str(N),'_m',num2str(obj.M*1000),'_V',num2str(voltage_ins),...
+        '_',datestr(now,'yyyy_mm_dd_HH_MM_SS')];
     video_dir=['videos_',simulation_identifier];
-    results_file=['e04_caliobration_',simulation_identifier,'.mat'];
+    results_file=['e04_results_scaled_HL_',simulation_identifier,'.mat'];
     
     buff_len=5000;
     y_pos_cells={};
@@ -185,11 +153,10 @@ for N=[21,61,130]
     filt_a_btm=obj.mechanical_model.bottom_plate.a(2,:);
     
     last_contact=obj.mechanical_model.contact_ix;
-    force_threshold=1e-7;
-    initial_strikes=1000;
-    strikes=initial_strikes;
+    tic
+    %%
     try
-        while T<5
+        while T<10
             
             %     new_a=obj.mechanical_model.bottom_plate.a(2,end);
             %     new_v=obj.mechanical_model.bottom_plate.v(2,end);
@@ -220,7 +187,7 @@ for N=[21,61,130]
             
             success_flag=false;
             while~success_flag
-                success_flag=obj.perform_timestep(dt,es_source);
+                success_flag=obj.perform_timestep(dt,source_es);
                 if success_flag && max_dt>dt
                     dt=dt*drunk_scale;
                 else
@@ -241,10 +208,10 @@ for N=[21,61,130]
             if (refresh_t_comsol>0) &&( T>=dispTCOMSOL)
                 dispTCOMSOL=T+refresh_t_comsol;
                 try
-                    obj.update_ES_model(es_source)
-                    disp("COMSOL update succesfull")
+                    obj.update_ES_model(source_es);
+                    disp([source_es,': update succesfull.'])
                 catch ME
-                    disp("Try to Update COMSOL model but failed")
+                    disp('Try to Update ',source_es,' model but failed')
                     
                     
                 end
@@ -270,7 +237,7 @@ for N=[21,61,130]
                 dispT3=0;
             end
             
-            if T>=dispT3 && false
+            if T>=dispT3
                 count=count+1;
                 dispT3=T+refresh_t3;
                 %         disp([num2str(T),':',num2str(dt_avg),'|',num2str(a),'|',num2str(new_a),'|',num2str(v),'|',num2str(new_v),'|',num2str(ov_force)])
@@ -292,16 +259,26 @@ for N=[21,61,130]
                 btm_obj_tracker.f_electr=obj.mechanical_model.bottom_plate_ext_f;
                 btm_obj_tracker.f_damp=obj.mechanical_model.bottom_plate.f_damping;
                 
-                
-                electr_obj_tracker.f_top=obj.electrostatic_model.comsol_EZ_model.Fy_dist_top;
-                electr_obj_tracker.x_top=obj.electrostatic_model.comsol_EZ_model.xs_top;
-                electr_obj_tracker.arclen_top=obj.electrostatic_model.comsol_EZ_model.arc_len_top;
-                electr_obj_tracker.h_top=obj.electrostatic_model.comsol_EZ_model.hs_top;
-                electr_obj_tracker.x_btm=obj.electrostatic_model.comsol_EZ_model.xs;
-                electr_obj_tracker.arclen_btm=obj.electrostatic_model.comsol_EZ_model.arc_len;
-                electr_obj_tracker.h_btm=obj.electrostatic_model.comsol_EZ_model.hs;
-                electr_obj_tracker.f_btm=obj.electrostatic_model.comsol_EZ_model.Fy_dist;
-                
+                if isequal(source_es,'COMSOL')
+                    electr_obj_tracker.f_top=obj.electrostatic_model.comsol_EZ_model.Fy_dist_top;
+                    electr_obj_tracker.x_top=obj.electrostatic_model.comsol_EZ_model.xs_top;
+                    electr_obj_tracker.arclen_top=obj.electrostatic_model.comsol_EZ_model.arc_len_top;
+                    electr_obj_tracker.h_top=obj.electrostatic_model.comsol_EZ_model.hs_top;
+                    electr_obj_tracker.x_btm=obj.electrostatic_model.comsol_EZ_model.xs;
+                    electr_obj_tracker.arclen_btm=obj.electrostatic_model.comsol_EZ_model.arc_len;
+                    electr_obj_tracker.h_btm=obj.electrostatic_model.comsol_EZ_model.hs;
+                    electr_obj_tracker.f_btm=obj.electrostatic_model.comsol_EZ_model.Fy_dist;
+                elseif isequal(source_es,'Analytical')
+                    electr_obj_tracker.f_top=obj.electrostatic_model.numerical_model.Fy_dist_top;
+                    electr_obj_tracker.x_top=obj.electrostatic_model.numerical_model.xs_top;
+                    electr_obj_tracker.arclen_top=obj.electrostatic_model.numerical_model.arc_len_top;
+                    electr_obj_tracker.h_top=obj.electrostatic_model.numerical_model.hs_top;
+                    electr_obj_tracker.x_btm=obj.electrostatic_model.numerical_model.xs;
+                    electr_obj_tracker.arclen_btm=obj.electrostatic_model.numerical_model.arc_len;
+                    electr_obj_tracker.h_btm=obj.electrostatic_model.numerical_model.hs;
+                    electr_obj_tracker.f_btm=obj.electrostatic_model.numerical_model.Fy_dist;
+                    
+                end
                 electr_buff{count}=electr_obj_tracker;
                 btm_obj_buff{count}=btm_obj_tracker;
                 top_obj_buff{count}=top_obj_tracker;
@@ -329,40 +306,37 @@ for N=[21,61,130]
             
             
             
-            %             if obj.mechanical_model.contact_ix==obj.N-4
-            %                 disp('Zipping is complete')
-            %                 break
-            %             end
-            if abs(ov_force)<force_threshold
-                strikes=strikes-1;
-                obj.mechanical_model.halt_velocities();
-                if strikes==0
-                    disp('Stationary status reaches.')
-                    break
-                end
-            else
-                strikes=initial_strikes;
+            if obj.mechanical_model.contact_ix==obj.N-4
+                disp('Zipping is complete')
+                break
             end
             
         end
         
         %
-    catch me
+    catch
         disp("Simulation Failed Saving results as they are")
     end
+    %%
+    real_time_elapsed=toc;
     y_pos_cells{end+1}=y_pos_buff;
     t_cells{end+1}=t_rec_buff;
     electr_cells{end+1}=electr_buff;
     btm_obj_cells{end+1}=btm_obj_buff;
     top_obj_cells{end+1}=top_obj_buff;
     
+    
     rem_cells=find(t_cells{end}~=0);
     
     t_cells{end}=t_cells{end}(rem_cells);
     y_pos_cells{end}=y_pos_cells{end}(rem_cells);
-    
-%     save(results_file,'obj','y_pos_cells','t_cells','electr_cells','btm_obj_cells','top_obj_cells','rem_cells');
-    obj2=obj;
-    save(results_file,'obj2')
-
+    %%
+    save(results_file,'obj','real_time_elapsed','y_pos_cells','t_cells','electr_cells','btm_obj_cells','top_obj_cells','rem_cells');
 end
+%%
+y_pos_cells{end}=[];
+t_cells{end}=[];
+electr_cells{end}=[];
+btm_obj_cells{end}=[];
+top_obj_cells{end}=[];
+save(results_file,'obj','real_time_elapsed','y_pos_cells','t_cells','electr_cells','btm_obj_cells','top_obj_cells','rem_cells');

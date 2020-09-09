@@ -4,7 +4,26 @@ function calculate_es_force(obj)
 %
 %
 % method='No_scaling';
+% method='No_scaling';
+% method='Match_mag';
+method='Permitivity';
+if isequal(method,'No_scaling')
+    scale=1;
+    
+elseif isequal(method,'Permitivity')
+    
+    scale=6.6;
+elseif isequal(method,'Match_mag')
+    scale=6.03;
+else
+    scale=1;
+    disp('Scaling method not recognized')
+end
 obj.calculate_distributed_force()
+obj.Fy_dist=obj.Fy_dist*scale;
+obj.Fx_dist=obj.Fx_dist*scale;
+obj.Fy_dist_top=obj.Fy_dist_top*scale;
+obj.Fx_dist_top=obj.Fx_dist_top*scale;
 
 
 

@@ -1,5 +1,7 @@
 clear;clc;
-folder_name='data2';
+% folder_name='e04_old_results_High_voltage';
+% folder_name='e04_results_HL_succesfull';
+folder_name='e04_zipping_data';
 extension='.mat';
 listing=dir(folder_name);
 files={};
@@ -76,14 +78,15 @@ for file_ix=1:n_files
     ts_samples=t(ts_samples_ixs);
     maxT=t(end);
     %How electric force distribution changes over time
-%     for i=1:length(ts_samples)
-%         curT=ts_samples(i);
-%         ix=ts_samples_ixs(i);
-%         plot(electr{ix}.arclen_btm,electr{ix}.f_btm,'Color',[curT/maxT 0 0])
-%         plot(electr{ix}.arclen_btm,electr{ix}.f_btm,'Color',[curT/maxT 0 0])
-%         hold on
-%     end
-    %
+    %%
+    for i=1:length(ts_samples)
+        curT=ts_samples(i);
+        ix=ts_samples_ixs(i);
+        plot(electr{ix}.arclen_btm,electr{ix}.f_btm,'Color',[curT/maxT 0 0])
+        plot(electr{ix}.arclen_btm,electr{ix}.f_btm,'Color',[curT/maxT 0 0])
+        hold on
+    end
+    %%
 %     filtered_net_felec=gaussfilt(res.y_perc,net_felec',0.1);
     filtered_net_felec=net_felec;
     x_data=y_perc;
@@ -108,7 +111,7 @@ figure(N)
 end
 
 h =  findobj('type','figure');
-export_folder='exportFigures/';
+export_folder='exportFigures2/';
 format='%02.f';
 for i =1:length(h)
 %     padded_Number=num2str(h(i).Number/1000,format);
